@@ -1,7 +1,7 @@
 <title>Sarah &amp; Tammy</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;800&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;800&family=Patrick+Hand&family=Special+Elite&family=Gochi+Hand&display=swap">
 <style>
 /* Layout: a comic-page masthead, then strips stacked newest-first, each a row of four panels (2x2 on phones), then the cast. */
 :root {
@@ -60,6 +60,16 @@ body { background: var(--bg); color: var(--fg); font-family: var(--body); font-s
 .who .role { font-family: var(--hand); font-size: 1.15rem; color: var(--ball); margin: 0 0 6px; }
 .who p { margin: 0; font-size: .95rem; max-width: 60ch; }
 @media (max-width: 420px) { .who { grid-template-columns: 1fr; } .who svg { margin: 0 auto; } }
+.style-chip { font-family: var(--hand); font-size: 1.05rem; color: var(--muted); border: 1.5px solid var(--rule); border-radius: 99px; padding: 0 10px; }
+.tryouts { margin-top: 56px; padding-top: 22px; border-top: 3px solid var(--fg); }
+.tryouts h2 { font-family: var(--display); font-weight: 400; font-size: 2rem; margin: 0; }
+.tryouts > p { margin: 4px 0 16px; color: var(--muted); max-width: 65ch; }
+.try-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .try-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+.try { margin: 0; min-width: 0; }
+.try svg { display: block; width: 100%; height: auto; }
+.try figcaption { margin-top: 6px; font-size: .88rem; color: var(--muted); line-height: 1.35; }
+.try figcaption b { display: block; color: var(--fg); font-family: var(--display); font-weight: 400; font-size: 1.1rem; }
 footer { margin-top: 40px; color: var(--muted); font-family: var(--hand); font-size: 1.1rem; text-align: center; }
 </style>
 
@@ -72,6 +82,11 @@ footer { margin-top: 40px; color: var(--muted); font-family: var(--hand); font-s
     <div class="issue"><b>The Morning Strip</b><span id="issue-range"></span></div>
   </div>
   <main id="strips"></main>
+  <section class="tryouts" aria-labelledby="try-h">
+    <h2 id="try-h">Style Tryouts</h2>
+    <p>The same panel drawn eight ways. Each morning's strip tries one of these looks until we settle on a favorite.</p>
+    <div class="try-grid" id="tryout-grid"></div>
+  </section>
   <section class="cast" aria-labelledby="cast-h">
     <h2 id="cast-h">The Cast</h2>
     <div class="cast-grid">
@@ -106,6 +121,44 @@ footer { margin-top: 40px; color: var(--muted); font-family: var(--hand); font-s
       <feFlood flood-color="#fdfcf7"/>
       <feComposite in2="rough" operator="in"/>
     </filter>
+    <!-- art-style tryouts -->
+    <filter id="st-sketch" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="2" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feColorMatrix in="d" type="saturate" values="0.28"/>
+    </filter>
+    <filter id="st-noir" x="0" y="0" width="100%" height="100%">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncR type="linear" slope="1.5" intercept="-0.22"/><feFuncG type="linear" slope="1.5" intercept="-0.22"/><feFuncB type="linear" slope="1.5" intercept="-0.2"/></feComponentTransfer>
+    </filter>
+    <filter id="st-news" x="0" y="0" width="100%" height="100%">
+      <feColorMatrix type="matrix" values="0.42 0.6 0.16 0 0  0.36 0.55 0.14 0 0  0.27 0.42 0.11 0 0  0 0 0 1 0"/>
+    </filter>
+    <filter id="st-water" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="9" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="1.6" result="b"/>
+      <feColorMatrix in="b" type="saturate" values="0.8" result="bs"/>
+      <feBlend in="SourceGraphic" in2="bs" mode="multiply" result="m"/>
+      <feComponentTransfer in="m"><feFuncR type="linear" slope="0.85" intercept="0.16"/><feFuncG type="linear" slope="0.85" intercept="0.15"/><feFuncB type="linear" slope="0.85" intercept="0.14"/></feComponentTransfer>
+    </filter>
+    <filter id="st-pop" x="0" y="0" width="100%" height="100%">
+      <feColorMatrix type="saturate" values="1.9"/>
+      <feComponentTransfer><feFuncR type="discrete" tableValues="0.1 0.45 0.8 1"/><feFuncG type="discrete" tableValues="0.1 0.45 0.8 1"/><feFuncB type="discrete" tableValues="0.15 0.5 0.85 1"/></feComponentTransfer>
+    </filter>
+    <filter id="st-crayon" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="2" seed="5" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feColorMatrix in="d" type="saturate" values="1.35"/>
+    </filter>
+    <filter id="st-neon" x="0" y="0" width="100%" height="100%">
+      <feColorMatrix type="matrix" values="0.55 0.1 0.2 0 0.02  0.1 0.35 0.2 0 0  0.35 0.25 0.8 0 0.12  0 0 0 1 0" result="c"/>
+      <feGaussianBlur in="c" stdDeviation="3" result="g"/>
+      <feBlend in="c" in2="g" mode="screen"/>
+    </filter>
+    <pattern id="halftone" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx="3.5" cy="3.5" r="1.5" fill="#000"/></pattern>
+    <pattern id="halftone-big" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(20)"><circle cx="6" cy="6" r="2.6" fill="#d6304a"/></pattern>
+    <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="1"/><feColorMatrix type="saturate" values="0"/></filter>
   </defs>
 </svg>
 
@@ -321,7 +374,7 @@ function chair(x, y, s = 1) {
 function caption(x, y, w, text, fs = 17) {
   const lines = wrap(text, Math.floor((w - 20) / (fs * .44)));
   const lh = fs * 1.15, h = lines.length * lh + 14;
-  return R(x, y, w, h, C.cap, 2, 2.5) + `<text font-family="Patrick Hand, Comic Neue, cursive" font-size="${fs}" fill="${C.ink}">`
+  return R(x, y, w, h, CUR.cap, 2, 2.5) + `<text font-family="${CUR.font}" font-size="${fs}" fill="${C.ink}">`
     + lines.map((l, i) => `<tspan x="${x + 10}" y="${y + 7 + fs * .85 + i * lh}">${esc(l)}</tspan>`).join('') + '</text>';
 }
 function wrap(t, max) {
@@ -344,7 +397,7 @@ function say(x, y, w, text, tail, { thought = false, fs = 19 } = {}) {
     s += R(left, y, w, h, '#fff', rx, 3);
     if (tail) { const [tx, ty] = tail; const bx = x + (tx - x) * .35, by = y + h + 12; s += `<circle cx="${bx}" cy="${by}" r="7" fill="#fff" ${INK} stroke-width="2.5"/><circle cx="${bx + (tx - bx) * .6}" cy="${by + (ty - by) * .6}" r="4" fill="#fff" ${INK} stroke-width="2"/>`; }
   }
-  s += `<text font-family="Patrick Hand, Comic Neue, cursive" font-size="${fs}" fill="${C.ink}" text-anchor="middle">`
+  s += `<text font-family="${CUR.font}" font-size="${fs}" fill="${C.ink}" text-anchor="middle">`
     + lines.map((l, i) => `<tspan x="${x}" y="${y + 10 + fs * .82 + i * lh}">${esc(l)}</tspan>`).join('') + '</text>';
   return s;
 }
@@ -382,10 +435,27 @@ const SCENES = {
   office: () => R(0, 0, 400, 420, '#e7eaf3', 0, 0) + R(0, 330, 400, 90, '#bdb4aa', 0, 0) + L('M0 330 L400 330', 3)
     + R(300, 40, 120, 290, '#2a2a2f', 0, 3) + `<text x="355" y="120" transform="rotate(90 355 120)" font-family="Nunito, sans-serif" font-weight="800" font-size="22" fill="#55555c">pilates</text>`
 };
+/* Art styles: each strip can carry style: '<key>'. A style re-treats the same drawings
+   (filters, texture overlays, lettering) so different looks can be compared. */
+const STYLES = {
+  classic: { name: 'Classic', note: 'Clean ink lines, flat bright color', font: 'Patrick Hand, Comic Neue, cursive', cap: '#fff2a6' },
+  sketch: { name: 'Pencil Sketchbook', note: 'Wobbly pencil lines, soft muted color, paper grain', filter: 'st-sketch', paper: .22, font: 'Gochi Hand, Patrick Hand, cursive', cap: '#f3efe4' },
+  watercolor: { name: 'Watercolor', note: 'Bleeding washes, soft edges, textured paper', filter: 'st-water', paper: .28, font: 'Patrick Hand, cursive', cap: '#fbf3dc' },
+  newsprint: { name: 'Vintage Newsprint', note: 'Sepia ink, halftone dots, Sunday-paper feel', filter: 'st-news', dots: .16, paper: .18, font: 'Patrick Hand, cursive', cap: '#efe2c0' },
+  noir: { name: 'Film Noir', note: 'Black and white, hard contrast, typewriter captions', filter: 'st-noir', dots: .1, font: 'Special Elite, Courier New, monospace', cap: '#e6e6e6' },
+  pop: { name: 'Pop Art', note: 'Punchy posterized color with big halftone dots', filter: 'st-pop', bigDots: .2, font: 'Patrick Hand, cursive', cap: '#ffe14d' },
+  crayon: { name: 'Crayon Doodle', note: 'Scribbly, waxy, kid-on-the-fridge energy', filter: 'st-crayon', paper: .42, font: 'Gochi Hand, cursive', cap: '#fff6c9' },
+  neon: { name: 'Neon Night', note: 'Purple TV-glow lighting, dreamy bloom', filter: 'st-neon', font: 'Patrick Hand, cursive', cap: '#e9ddff' }
+};
+let CUR = STYLES.classic;
 function panel(alt, body) {
   panel.n = (panel.n || 0) + 1; const id = 'cp' + panel.n;
   return `<svg viewBox="0 0 400 420" role="img" aria-label="${esc(alt).replace(/"/g, '&quot;')}"><defs><clipPath id="${id}"><rect x="4" y="4" width="392" height="412" rx="8"/></clipPath></defs>`
-    + `<rect x="4" y="4" width="392" height="412" rx="8" fill="#fff"/><g clip-path="url(#${id})">${body}</g>`
+    + `<rect x="4" y="4" width="392" height="412" rx="8" fill="#fff"/><g clip-path="url(#${id})"><g${CUR.filter ? ` filter="url(#${CUR.filter})"` : ''}>${body}</g>`
+    + (CUR.paper ? `<rect x="0" y="0" width="400" height="420" filter="url(#paper)" opacity="${CUR.paper}" style="mix-blend-mode:multiply"/>` : '')
+    + (CUR.dots ? `<rect x="0" y="0" width="400" height="420" fill="url(#halftone)" opacity="${CUR.dots}"/>` : '')
+    + (CUR.bigDots ? `<rect x="0" y="0" width="400" height="420" fill="url(#halftone-big)" opacity="${CUR.bigDots}" style="mix-blend-mode:multiply"/>` : '')
+    + `</g>`
     + `<rect x="4" y="4" width="392" height="412" rx="8" fill="none" stroke="${C.ink}" stroke-width="5"/></svg>`;
 }
 const motion = (pts, w = 3) => pts.map(([x1, y1, x2, y2]) => L(`M${x1} ${y1} L${x2} ${y2}`, w)).join('');
@@ -519,10 +589,16 @@ const host = document.getElementById('strips');
 for (const st of [...STRIPS].reverse()) {
   const sec = document.createElement('article');
   sec.className = 'strip'; sec.id = 'no-' + st.no;
-  sec.innerHTML = `<header><span class="no">No. ${st.no}</span><h2>${esc(st.title)}</h2><span class="tag">${esc(st.tag)}</span><span class="date">${fmt(st.date)}</span></header>`
+  CUR = STYLES[st.style] || STYLES.classic;
+  sec.innerHTML = `<header><span class="no">No. ${st.no}</span><h2>${esc(st.title)}</h2><span class="tag">${esc(st.tag)}</span><span class="style-chip">Style: ${esc(CUR.name)}</span><span class="date">${fmt(st.date)}</span></header>`
     + `<div class="panels">${st.panels.map(p => p()).join('')}</div>`;
   host.appendChild(sec);
 }
+// Style tryouts: the same panel in every style
+document.getElementById('tryout-grid').innerHTML = Object.entries(STYLES).map(([k, st]) => {
+  CUR = st; return `<figure class="try"><div>${STRIPS[0].panels[2]()}</div><figcaption><b>${esc(st.name)}</b>${esc(st.note)}</figcaption></figure>`;
+}).join('');
+CUR = STYLES.classic;
 document.getElementById('issue-range').textContent = `Strips 1–${STRIPS.length} · updated ${fmt(STRIPS[STRIPS.length - 1].date)}`;
 const mini = (body) => `<svg viewBox="0 0 400 420" aria-hidden="true">${body}</svg>`;
 document.getElementById('cast-sarah').innerHTML = mini(R(0, 0, 400, 420, '#dcdff0', 40, 0) + sarah({ x: 200, y: 470, s: 1.45, arms: ['down', 'wave'], face: 'smirk' }));
