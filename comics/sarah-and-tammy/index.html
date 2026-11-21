@@ -1,0 +1,530 @@
+<title>Sarah &amp; Tammy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;800&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: a comic-page masthead, then strips stacked newest-first, each a row of four panels (2x2 on phones), then the cast. */
+:root {
+  --bg: #ebe8f3;          /* lavender-grey, Sarah's purple meets Tammy's coat */
+  --paper: #fbfaff;
+  --fg: #26222f;
+  --muted: #6b6578;
+  --ball: #ef5a33;        /* the orange ball */
+  --denim: #3d5f94;
+  --rule: #cfc9dd;
+  --display: "Lilita One", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --body: "Nunito", system-ui, -apple-system, sans-serif;
+  --hand: "Patrick Hand", "Comic Neue", "Comic Sans MS", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1a24; --paper: #26232f; --fg: #eeeaf6; --muted: #a7a0b8;
+    --ball: #ff7a52; --denim: #8fb0e6; --rule: #3a3646; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1a24; --paper: #26232f; --fg: #eeeaf6; --muted: #a7a0b8;
+  --ball: #ff7a52; --denim: #8fb0e6; --rule: #3a3646; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+.wrap {
+  max-width: 1240px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.mast { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; padding-bottom: 18px; border-bottom: 3px solid var(--fg); }
+.mast h1 { font-family: var(--display); font-weight: 400; font-size: clamp(2.6rem, 7vw, 4.6rem); line-height: .95; margin: 0; letter-spacing: .5px; text-wrap: balance; }
+.mast h1 .amp { color: var(--ball); }
+.mast p { margin: 6px 0 0; color: var(--muted); font-size: 1.05rem; max-width: 46ch; }
+.issue { font-family: var(--hand); font-size: 1.15rem; text-align: right; color: var(--muted); line-height: 1.3; }
+.issue b { color: var(--fg); font-weight: 400; font-size: 1.35rem; display: block; }
+
+.strip { margin-top: 40px; }
+.strip header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 12px; }
+.strip .no { font-family: var(--hand); font-size: 1.1rem; color: var(--paper); background: var(--fg); padding: 0 10px; border-radius: 4px; }
+.strip h2 { font-family: var(--display); font-weight: 400; font-size: clamp(1.5rem, 3.4vw, 2.1rem); margin: 0; line-height: 1.1; }
+.strip .tag { font-size: .8rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--denim); }
+.strip .date { margin-left: auto; color: var(--muted); font-family: var(--hand); font-size: 1.1rem; }
+.panels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.panels svg { display: block; width: 100%; height: auto; max-width: 100%; }
+@media (max-width: 760px) { .panels { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
+
+.cast { margin-top: 56px; padding-top: 22px; border-top: 3px solid var(--fg); }
+.cast h2 { font-family: var(--display); font-weight: 400; font-size: 2rem; margin: 0 0 16px; }
+.cast-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 760px) { .cast-grid { grid-template-columns: 1fr; } }
+.who { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: center; background: var(--paper); border: 2px solid var(--rule); border-radius: 14px; padding: 14px; }
+.who svg { width: 150px; height: auto; display: block; }
+.who h3 { font-family: var(--display); font-weight: 400; font-size: 1.6rem; margin: 0; }
+.who .role { font-family: var(--hand); font-size: 1.15rem; color: var(--ball); margin: 0 0 6px; }
+.who p { margin: 0; font-size: .95rem; max-width: 60ch; }
+@media (max-width: 420px) { .who { grid-template-columns: 1fr; } .who svg { margin: 0 auto; } }
+footer { margin-top: 40px; color: var(--muted); font-family: var(--hand); font-size: 1.1rem; text-align: center; }
+</style>
+
+<div class="wrap">
+  <div class="mast">
+    <div>
+      <h1>Sarah <span class="amp">&amp;</span> Tammy</h1>
+      <p>One genius. One menace. Shared custody of the couch.</p>
+    </div>
+    <div class="issue"><b>The Morning Strip</b><span id="issue-range"></span></div>
+  </div>
+  <main id="strips"></main>
+  <section class="cast" aria-labelledby="cast-h">
+    <h2 id="cast-h">The Cast</h2>
+    <div class="cast-grid">
+      <div class="who"><div id="cast-sarah"></div><div>
+        <h3>Sarah</h3><p class="role">age 14 · resident genius</p>
+        <p>Keeps score, keeps notes, keeps a perfectly straight face. Wears a daisy cardigan and striped arm warmers, delivers a world-class side-eye, and will play dead on any floor if the role calls for it.</p>
+      </div></div>
+      <div class="who"><div id="cast-tammy"></div><div>
+        <h3>Tammy</h3><p class="role">cat · slightly mischievous (allegedly)</p>
+        <p>Grey coat, white socks, a tiny white mustache. Sleeps wherever she is told not to, balances things on her head when it suits her, and keeps a private collection under the couch.</p>
+      </div></div>
+    </div>
+  </section>
+  <footer>Based on real events. Mostly.</footer>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="tiedye" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d9508b"/><stop offset=".3" stop-color="#7d5bd8"/>
+      <stop offset=".6" stop-color="#3fa9e6"/><stop offset=".85" stop-color="#5fd0c4"/><stop offset="1" stop-color="#6b62d4"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffe7a8" stop-opacity=".9"/><stop offset="1" stop-color="#ffe7a8" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="chalk" x="-25%" y="-25%" width="150%" height="150%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="13" result="outer"/>
+      <feMorphology in="SourceAlpha" operator="dilate" radius="8" result="inner"/>
+      <feComposite in="outer" in2="inner" operator="out" result="ring"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="4" result="noise"/>
+      <feDisplacementMap in="ring" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+      <feFlood flood-color="#fdfcf7"/>
+      <feComposite in2="rough" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+
+<script>
+/* ============================================================
+   SARAH & TAMMY — drawing kit
+   Every panel is a 400x420 SVG built from these helpers.
+   To add a strip, push a new object onto STRIPS (newest last).
+   ============================================================ */
+const C = {
+  ink: '#2a2433', skin: '#f8dccb', hair: '#5a3a27', hairHi: '#7b5238', glass: '#8b7fa3',
+  cardigan: '#1f1e27', warmer: '#8e899b', pants: '#4d3576', shoe: '#1d1b22',
+  cat: '#636b78', catDk: '#4f5662', catW: '#f6f4ef', earIn: '#c9a1a5', bean: '#55474c', beanPink: '#e9a29d',
+  catEye: '#d9d35a', collar: '#141418', ball: '#ef5a33', white: '#ffffff', cap: '#fff2a6'
+};
+const INK = `stroke="${C.ink}" stroke-linejoin="round" stroke-linecap="round"`;
+const P = (d, fill, w = 3, extra = '') => `<path d="${d}" fill="${fill}" ${INK} stroke-width="${w}" ${extra}/>`;
+const Pn = (d, fill, extra = '') => `<path d="${d}" fill="${fill}" stroke="none" ${extra}/>`;
+const L = (d, w = 3, col = C.ink, extra = '') => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+const E = (cx, cy, rx, ry, fill, w = 3, extra = '') => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" ${w ? `${INK} stroke-width="${w}"` : 'stroke="none"'} ${extra}/>`;
+const R = (x, y, w, h, fill, rx = 0, sw = 3, extra = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" ${sw ? `${INK} stroke-width="${sw}"` : 'stroke="none"'} ${extra}/>`;
+const G = (t, inner, extra = '') => `<g transform="${t}" ${extra}>${inner}</g>`;
+// Thick outlined limb along a polyline
+const limb = (pts, w, col) => { const d = 'M' + pts.map(p => p.join(' ')).join(' L'); return L(d, w + 6) + L(d, w, col); };
+function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+
+/* ---------------- SARAH ---------------- */
+const ARMS = { // right-side positions (left mirrors x)
+  down: { e: [50, -110], h: [52, -78] }, hip: { e: [70, -112], h: [42, -88] },
+  wave: { e: [66, -172], h: [74, -210] }, point: { e: [74, -142], h: [106, -150] },
+  chin: { e: [56, -106], h: [16, -160] }, hold: { e: [54, -108], h: [20, -112] },
+  up: { e: [62, -182], h: [64, -222] }, shrug: { e: [66, -116], h: [90, -140] },
+  star: { e: [84, -170], h: [120, -194] }, write: { e: [56, -104], h: [26, -122] }
+};
+function sarahArm(sx, preset) {
+  const a = ARMS[preset] || ARMS.down;
+  const sh = [38 * sx, -146], e = [a.e[0] * sx, a.e[1]], h = [a.h[0] * sx, a.h[1]];
+  const m = [e[0] + (h[0] - e[0]) * .45, e[1] + (h[1] - e[1]) * .45];
+  return limb([sh, e, h], 14, C.cardigan) + L(`M${m.join(' ')} L${h.join(' ')}`, 13, C.warmer)
+    + L(`M${(m[0] * .6 + h[0] * .4)} ${(m[1] * .6 + h[1] * .4)} l0.1 0.1`, 13, '#a9a4b6')
+    + `<circle cx="${h[0]}" cy="${h[1]}" r="8" fill="${C.skin}" ${INK} stroke-width="2.5"/>`;
+}
+const SARAH_FACES = {
+  neutral: { b: 'n', e: 'dot', m: 'neutral' }, smile: { b: 'n', e: 'dot', m: 'smile', blush: 1 },
+  excited: { b: 'up', e: 'happy', m: 'grin', blush: 1 }, deadpan: { b: 'flat', e: 'half', m: 'flat' },
+  skeptical: { b: 'skep', e: 'half', m: 'side' }, surprised: { b: 'up', e: 'wide', m: 'o' },
+  smirk: { b: 'n', e: 'half', m: 'smirk' }, dead: { b: 'n', e: 'closed', m: 'tongue' },
+  determined: { b: 'angry', e: 'dot', m: 'smirk' }, thinking: { b: 'skep', e: 'dot', m: 'hmm', look: -3 }
+};
+function sarahFace(name, look = 0) {
+  const f = SARAH_FACES[name] || SARAH_FACES.neutral; look = f.look ?? look;
+  let s = '';
+  for (const ex of [-19, 19]) {
+    const x = ex + look;
+    if (f.e === 'dot') s += E(x, -199, 3.4, 4.8, C.ink, 0);
+    if (f.e === 'half') s += E(x, -197, 3.4, 3, C.ink, 0) + L(`M${ex - 8} -201 L${ex + 8} -201`, 2.6);
+    if (f.e === 'happy') s += L(`M${ex - 7} -197 Q${ex} -206 ${ex + 7} -197`, 2.8);
+    if (f.e === 'closed') s += L(`M${ex - 7} -200 Q${ex} -194 ${ex + 7} -200`, 2.8);
+    if (f.e === 'wide') s += `<circle cx="${x}" cy="-199" r="5.6" fill="${C.ink}"/><circle cx="${x + 1.8}" cy="-201" r="1.8" fill="#fff"/>`;
+  }
+  const m = {
+    neutral: L('M-6 -174 Q0 -172 6 -174', 2.6), smile: L('M-11 -177 Q0 -166 11 -177', 2.8),
+    grin: P('M-13 -178 Q0 -158 13 -178 Z', '#7a2e3a', 2.5), flat: L('M-7 -173 L7 -173', 2.8),
+    side: L('M-3 -173 L10 -176', 2.8), smirk: L('M-6 -173 Q4 -171 11 -178', 2.8),
+    o: E(0, -172, 4.5, 6, '#7a2e3a', 2.4), hmm: L('M-7 -173 Q-3 -176 1 -173 Q5 -170 9 -173', 2.6),
+    tongue: E(6, -169, 5, 6.5, '#ef8e9e', 2.2) + L('M-10 -176 Q0 -171 11 -176', 2.8)
+  }[f.m] || '';
+  if (f.blush) s += E(-31, -181, 7, 4, '#f29aa3', 0, 'opacity=".45"') + E(31, -181, 7, 4, '#f29aa3', 0, 'opacity=".45"');
+  return s + m + L('M1 -191 q3 4 -1 6', 2, '#c99a86');
+}
+function sarahBrows(f) {
+  const b = (SARAH_FACES[f] || SARAH_FACES.neutral).b;
+  const d = {
+    n: 'M-27 -219 Q-19 -223 -11 -219 M11 -219 Q19 -223 27 -219',
+    up: 'M-27 -226 Q-19 -232 -11 -226 M11 -226 Q19 -232 27 -226',
+    flat: 'M-27 -218 L-11 -218 M11 -218 L27 -218',
+    skep: 'M-27 -218 L-11 -218 M11 -225 Q19 -231 27 -223',
+    angry: 'M-27 -224 L-11 -217 M11 -217 L27 -224'
+  }[b];
+  return L(d, 3);
+}
+/** Sarah. Origin = between her feet. opts: arms ('down' | [left,right]), face, flip, legs ('stand'|'star'|'walk'), hold ('ball'|'notebook'), backpack */
+function sarah({ x = 0, y = 0, s = 1, flip = false, arms = 'down', face = 'neutral', legs = 'stand', look = 0, hold = '', backpack = false } = {}) {
+  const [la, ra] = Array.isArray(arms) ? arms : [arms, arms];
+  const legRot = { stand: [0, 0], star: [20, -20], walk: [10, -8] }[legs] || [0, 0];
+  let g = '';
+  // back hair
+  g += P('M-54 -206 C-58 -272 58 -272 54 -206 C60 -150 64 -112 50 -92 L-50 -92 C-64 -112 -60 -150 -54 -206 Z', C.hair);
+  if (backpack) g += R(-50, -150, 100, 78, '#3f6e8c', 16);
+  // legs
+  const leg = (sx, rot) => G(`rotate(${rot} ${18 * sx} -74)`,
+    P(`M${6 * sx} -76 L${36 * sx} -76 L${40 * sx} -10 L${6 * sx} -10 Z`, C.pants) + E(24 * sx, -6, 19, 8, C.shoe));
+  g += leg(-1, legRot[0]) + leg(1, legRot[1]);
+  // torso (tie-dye tee + daisy cardigan)
+  g += R(-9, -168, 18, 16, C.skin, 3, 2.5);
+  g += P('M-40 -148 Q-42 -158 -28 -158 L28 -158 Q42 -158 40 -148 L42 -70 L-42 -70 Z', 'url(#tiedye)');
+  g += P('M-40 -148 Q-42 -158 -28 -158 L-14 -158 L-11 -70 L-42 -70 Z', C.cardigan) + P('M40 -148 Q42 -158 28 -158 L14 -158 L11 -70 L42 -70 Z', C.cardigan);
+  for (const [dx, dy] of [[-30, -142], [-21, -120], [-33, -100], [-23, -80], [27, -136], [33, -112], [22, -96], [31, -78]])
+    g += `<circle cx="${dx}" cy="${dy}" r="4.2" fill="#fff"/><circle cx="${dx}" cy="${dy}" r="1.7" fill="#f2c230"/>`;
+  if (backpack) g += L('M-26 -156 L-22 -72 M26 -156 L22 -72', 6, '#2c4f66');
+  // arms
+  g += sarahArm(-1, la) + sarahArm(1, ra);
+  if (hold === 'ball') g += ball(0, -122, 15);
+  if (hold === 'notebook') g += G('rotate(-8 0 -120)', R(-34, -142, 50, 36, '#fff', 3, 2.5) + L('M-28 -132 L8 -132 M-28 -124 L10 -124 M-28 -116 L4 -116', 1.6, '#9db4d8'))
+    + L('M26 -122 L40 -146', 4, '#f2c230') + L('M26 -122 L29 -127', 4, C.ink);
+  // head
+  g += E(0, -205, 46, 48, C.skin);
+  g += sarahFace(face, look);
+  // glasses
+  g += `<circle cx="-19" cy="-200" r="15" fill="rgba(255,255,255,.22)" stroke="${C.glass}" stroke-width="3.5"/><circle cx="19" cy="-200" r="15" fill="rgba(255,255,255,.22)" stroke="${C.glass}" stroke-width="3.5"/>`
+    + L('M-4 -202 Q0 -205 4 -202', 3, C.glass) + L('M-34 -203 L-45 -207 M34 -203 L45 -207', 3, C.glass);
+  // bangs + side locks
+  g += P('M-47 -214 C-50 -264 50 -264 47 -214 C40 -230 30 -236 20 -229 C12 -241 -2 -241 -8 -231 C-18 -241 -36 -236 -47 -214 Z', C.hair);
+  g += P('M-46 -220 C-56 -186 -54 -160 -44 -140 L-37 -142 C-44 -166 -44 -196 -40 -216 Z', C.hair) + P('M46 -220 C56 -186 54 -160 44 -140 L37 -142 C44 -166 44 -196 40 -216 Z', C.hair);
+  g += L('M-20 -252 C-8 -258 10 -258 22 -250', 3, C.hairHi);
+  g += sarahBrows(face);
+  return G(`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`, g);
+}
+
+/* ---------------- TAMMY ---------------- */
+function catEyes(face) {
+  let s = '';
+  for (const ex of [-16, 16]) {
+    if (['sleep', 'happy'].includes(face)) {
+      s += L(face === 'sleep' ? `M${ex - 8} -4 Q${ex} 3 ${ex + 8} -4` : `M${ex - 8} -2 Q${ex} -11 ${ex + 8} -2`, 3);
+      continue;
+    }
+    s += E(ex, -6, 9, 10, C.catEye, 2.5);
+    if (face === 'wide') s += E(ex, -5, 6.5, 8, C.ink, 0) + `<circle cx="${ex + 2.5}" cy="-8.5" r="2.4" fill="#fff"/>`;
+    else if (face === 'shock') s += E(ex, -6, 2, 2.5, C.ink, 0);
+    else if (face === 'plot') s += E(ex, -5, 1.4, 7, C.ink, 0);
+    else s += E(ex, -5, 3, 7, C.ink, 0);
+    if (['smug', 'plot'].includes(face)) s += P(`M${ex - 10} -5 C${ex - 10} -19 ${ex + 10} -19 ${ex + 10} -5 Z`, C.cat, 2.5);
+  }
+  if (face === 'plot') s += L('M-27 -22 L-8 -16 M8 -16 L27 -22', 3);
+  return s;
+}
+function catHead(face = 'neutral') {
+  let s = '';
+  s += P('M-35 -12 L-32 -54 L-6 -31 Z', C.cat) + Pn('M-29 -19 L-28 -44 L-12 -30 Z', C.earIn);
+  s += P('M35 -12 L32 -54 L6 -31 Z', C.cat) + Pn('M29 -19 L28 -44 L12 -30 Z', C.earIn);
+  s += P('M-41 4 C-43 -26 -22 -35 0 -35 C22 -35 43 -26 41 4 C39 25 20 32 0 32 C-20 32 -39 25 -41 4 Z', C.cat);
+  s += L('M-6 -33 L-4 -24 M0 -34 L0 -25 M6 -33 L4 -24', 2, C.catDk);
+  s += catEyes(face);
+  s += E(0, 15, 10, 6.5, C.catW, 0); // her little white mustache
+  s += P('M-5 5 L5 5 L0 10.5 Z', '#7d6266', 1.6);
+  s += face === 'shock' ? E(0, 19, 4, 5, '#5b2a33', 2) : L('M0 10.5 L0 14 M-7 15 Q-3.5 19.5 0 14 Q3.5 19.5 7 15', 2);
+  s += L('M-14 12 L-50 5 M-14 15 L-52 16 M-14 18 L-47 26 M14 12 L50 5 M14 15 L52 16 M14 18 L47 26', 1.4);
+  return s;
+}
+function paw(x, y, r = 11, beans = false, rot = 0) {
+  let s = E(x, y, r, r * .78, C.catW, 2.5);
+  if (beans) s += E(x, y + r * .18, r * .42, r * .3, C.bean, 0) + [[-.45, -.32, C.bean], [-.15, -.5, C.bean], [.17, -.5, C.beanPink], [.46, -.3, C.bean]]
+    .map(([dx, dy, c]) => E(x + dx * r, y + dy * r, r * .13, r * .16, c, 0)).join('');
+  return rot ? G(`rotate(${rot} ${x} ${y})`, s) : s;
+}
+function ball(x, y, r = 14) {
+  return `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.ball}" ${INK} stroke-width="2.5"/>` + E(x - r * .35, y - r * .4, r * .28, r * .18, '#ffb08f', 0);
+}
+/** Tammy. Origin = floor under her. pose: sit | loaf | back | walk. face: neutral|wide|smug|plot|sleep|happy|shock. */
+function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutral', raise = false, ballOnHead = false } = {}) {
+  let g = '';
+  if (pose === 'sit') {
+    g += L('M30 -8 C72 -4 82 -42 62 -66', 19) + L('M30 -8 C72 -4 82 -42 62 -66', 13, C.cat);
+    g += P('M-40 0 C-50 -42 -36 -82 -22 -100 L22 -100 C36 -82 50 -42 40 0 Z', C.cat);
+    g += Pn('M-17 -98 C-24 -60 -14 -30 0 -18 C14 -30 24 -60 17 -98 Z', C.catW);
+    g += L('M-14 -60 L-14 -8 M14 -60 L14 -8', 2.2, '#cfcac2');
+    g += paw(-15, -6, 12) + (raise ? '' : paw(15, -6, 12));
+    if (raise) g += limb([[16, -70], [34, -120], [42, -160]], 18, C.catW) + paw(42, -168, 15, true, 10);
+    g += L('M-25 -100 Q0 -90 25 -100', 7, C.collar);
+    g += G('translate(0 -128)', catHead(face));
+    if (ballOnHead) g += ball(0, -186, 17);
+  }
+  if (pose === 'loaf') {
+    g += E(0, -36, 76, 38, C.cat);
+    g += L('M-40 -60 Q-10 -74 26 -66', 2.2, C.catDk);
+    g += L('M-70 -24 C-66 6 12 10 44 -2', 19) + L('M-70 -24 C-66 6 12 10 44 -2', 13, C.cat);
+    g += paw(26, -8, 15);
+    g += G('translate(40 -46) rotate(14) scale(.8)', catHead(face));
+  }
+  if (pose === 'back') {
+    g += L('M56 -26 C92 -20 98 -52 82 -64', 19) + L('M56 -26 C92 -20 98 -52 82 -64', 13, C.cat);
+    g += limb([[30, -46], [44, -96]], 18, C.cat) + paw(46, -104, 14, true, 8);
+    g += E(5, -32, 64, 31, C.cat);
+    g += E(12, -40, 42, 17, C.catW, 0);
+    g += G('translate(-72 -30) rotate(-78)', catHead(face));
+    g += limb([[-24, -50], [-30, -118]], 17, C.catW) + paw(-31, -128, 14, true, -4);
+    g += limb([[-6, -52], [2, -114]], 17, C.catW) + paw(3, -124, 14, true, 6);
+  }
+  if (pose === 'walk') {
+    g += L('M-50 -64 C-88 -76 -86 -122 -62 -130', 19) + L('M-50 -64 C-88 -76 -86 -122 -62 -130', 13, C.cat);
+    for (const lx of [-38, -22, 22, 36]) g += limb([[lx, -50], [lx, -8]], 13, C.cat) + paw(lx + 3, -5, 9);
+    g += E(0, -56, 57, 28, C.cat);
+    g += E(40, -50, 14, 17, C.catW, 0);
+    g += L('M44 -82 Q54 -72 62 -80', 6, C.collar);
+    g += G('translate(58 -96) scale(.86)', catHead(face));
+  }
+  return G(`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`, g);
+}
+
+/* ---------------- PROPS & SCENES ---------------- */
+function chair(x, y, s = 1) {
+  let g = '';
+  for (const [dx, dy] of [[-64, -10], [64, -10], [-34, -4], [34, -4], [0, -2]])
+    g += L(`M0 -30 L${dx} ${dy}`, 7, '#2b2a30') + `<circle cx="${dx}" cy="${dy + 4}" r="7" fill="#1d1c21"/>`;
+  g += R(-6, -96, 12, 68, '#f0f0f0', 3, 2.5);
+  g += P('M-58 -122 C-66 -200 -58 -272 -40 -296 L40 -296 C58 -272 66 -200 58 -122 Z', '#2f62c9');
+  for (let i = 0; i < 9; i++) g += L(`M-52 ${-140 - i * 17} L52 ${-140 - i * 17}`, 2, '#5b86e0');
+  g += R(-92, -170, 20, 12, '#222', 5, 2.5) + R(72, -170, 20, 12, '#222', 5, 2.5) + L('M-82 -158 L-70 -124 M82 -158 L70 -124', 6, '#222');
+  g += R(-74, -122, 148, 28, '#2f62c9', 12) + R(-64, -134, 128, 18, '#cdbfa6', 7, 2.5);
+  return G(`translate(${x} ${y}) scale(${s})`, g);
+}
+function caption(x, y, w, text, fs = 17) {
+  const lines = wrap(text, Math.floor((w - 20) / (fs * .44)));
+  const lh = fs * 1.15, h = lines.length * lh + 14;
+  return R(x, y, w, h, C.cap, 2, 2.5) + `<text font-family="Patrick Hand, Comic Neue, cursive" font-size="${fs}" fill="${C.ink}">`
+    + lines.map((l, i) => `<tspan x="${x + 10}" y="${y + 7 + fs * .85 + i * lh}">${esc(l)}</tspan>`).join('') + '</text>';
+}
+function wrap(t, max) {
+  const out = []; let cur = '';
+  for (const w of t.split(' ')) { if (cur && (cur + ' ' + w).length > max) { out.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w; }
+  if (cur) out.push(cur); return out;
+}
+const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+/** Speech (or thought) balloon. (x,y) = top centre. tail = [tx,ty] point it aims at. */
+function say(x, y, w, text, tail, { thought = false, fs = 19 } = {}) {
+  const lines = wrap(text, Math.floor((w - 28) / (fs * .43)));
+  const lh = fs * 1.12, h = lines.length * lh + 20, left = x - w / 2, rx = thought ? h / 2 : Math.min(h / 2, 22);
+  let s = '';
+  if (tail && !thought) {
+    const [tx, ty] = tail; const below = ty > y + h / 2;
+    const bx = Math.max(left + 24, Math.min(left + w - 24, x + (tx - x) * .25)), by = below ? y + h - 4 : y + 4;
+    const t = `M${bx - 10} ${by} L${tx} ${ty} L${bx + 10} ${by} Z`;
+    s += P(t, '#fff', 3.5) + R(left, y, w, h, '#fff', rx, 3) + Pn(t, '#fff');
+  } else {
+    s += R(left, y, w, h, '#fff', rx, 3);
+    if (tail) { const [tx, ty] = tail; const bx = x + (tx - x) * .35, by = y + h + 12; s += `<circle cx="${bx}" cy="${by}" r="7" fill="#fff" ${INK} stroke-width="2.5"/><circle cx="${bx + (tx - bx) * .6}" cy="${by + (ty - by) * .6}" r="4" fill="#fff" ${INK} stroke-width="2"/>`; }
+  }
+  s += `<text font-family="Patrick Hand, Comic Neue, cursive" font-size="${fs}" fill="${C.ink}" text-anchor="middle">`
+    + lines.map((l, i) => `<tspan x="${x}" y="${y + 10 + fs * .82 + i * lh}">${esc(l)}</tspan>`).join('') + '</text>';
+  return s;
+}
+function sfx(x, y, text, { size = 46, rot = -8, fill = C.ball } = {}) {
+  return `<text x="${x}" y="${y}" transform="rotate(${rot} ${x} ${y})" font-family="Lilita One, Arial Rounded MT Bold, sans-serif" font-size="${size}" text-anchor="middle" fill="${fill}" stroke="${C.ink}" stroke-width="3" paint-order="stroke" letter-spacing="1">${esc(text)}</text>`;
+}
+const SCENES = {
+  living: (mood = 'day') => {
+    const wall = mood === 'eve' ? '#b8b3d8' : '#dcdff0', floor = mood === 'eve' ? '#8a7f86' : '#a59a91';
+    let s = R(0, 0, 400, 420, wall, 0, 0) + R(0, 340, 400, 80, floor, 0, 0) + L('M0 340 L400 340', 3);
+    for (let i = 0; i < 4; i++) s += L(`M0 ${360 + i * 18} L400 ${360 + i * 18}`, 1.5, 'rgba(0,0,0,.12)');
+    s += R(26, 50, 92, 150, '#f6f2e4', 3, 3);
+    for (let i = 0; i < 15; i++) s += L(`M30 ${58 + i * 9.5} L114 ${58 + i * 9.5}`, 1.5, '#d8d0b8');
+    if (mood === 'eve') s += `<circle cx="340" cy="80" r="90" fill="url(#glow)"/>` + L('M340 0 L340 60', 3) + P('M318 60 L362 60 L352 86 L328 86 Z', '#f6d58a');
+    return s;
+  },
+  floor: () => {
+    let s = R(0, 0, 400, 420, '#dcd5ca', 0, 0) + R(0, 0, 400, 40, '#f4f0ea', 0, 0) + L('M0 40 L400 40', 3);
+    for (let i = 0; i < 26; i++) s += `<circle cx="${10 + i * 16}" cy="${12 + (i % 2) * 14}" r="2.4" fill="#b7b0c4"/>`;
+    s += L('M30 420 L110 300 L150 290 L230 180 M260 420 L300 330 L400 300 M330 40 L350 120 L400 140', 1.5, 'rgba(60,50,40,.28)');
+    s += E(320, 380, 50, 18, 'rgba(160,140,120,.18)', 0) + E(70, 120, 40, 16, 'rgba(160,140,120,.15)', 0);
+    return s;
+  },
+  gym: () => {
+    let s = R(0, 0, 400, 420, '#8c8f95', 0, 0);
+    for (let i = 0; i < 20; i++) s += R(i * 22 + 8, 0, 7, 330, '#7c7f86', 0, 0);
+    s += R(0, 326, 400, 94, '#d9a467', 0, 0) + L('M0 326 L400 326', 3) + L('M0 372 L400 360', 7, '#1e1d22') + L('M0 404 L400 396', 3, '#c43b3b');
+    return s;
+  },
+  garage: () => {
+    let s = R(0, 0, 400, 420, '#ece8df', 0, 0);
+    for (const [cx, cy] of [[120, 60], [150, 40], [300, 70], [260, 110], [330, 50]]) s += E(cx, cy, 3, 4, '#a39887', 0);
+    return s;
+  },
+  office: () => R(0, 0, 400, 420, '#e7eaf3', 0, 0) + R(0, 330, 400, 90, '#bdb4aa', 0, 0) + L('M0 330 L400 330', 3)
+    + R(300, 40, 120, 290, '#2a2a2f', 0, 3) + `<text x="355" y="120" transform="rotate(90 355 120)" font-family="Nunito, sans-serif" font-weight="800" font-size="22" fill="#55555c">pilates</text>`
+};
+function panel(alt, body) {
+  panel.n = (panel.n || 0) + 1; const id = 'cp' + panel.n;
+  return `<svg viewBox="0 0 400 420" role="img" aria-label="${esc(alt).replace(/"/g, '&quot;')}"><defs><clipPath id="${id}"><rect x="4" y="4" width="392" height="412" rx="8"/></clipPath></defs>`
+    + `<rect x="4" y="4" width="392" height="412" rx="8" fill="#fff"/><g clip-path="url(#${id})">${body}</g>`
+    + `<rect x="4" y="4" width="392" height="412" rx="8" fill="none" stroke="${C.ink}" stroke-width="5"/></svg>`;
+}
+const motion = (pts, w = 3) => pts.map(([x1, y1, x2, y2]) => L(`M${x1} ${y1} L${x2} ${y2}`, w)).join('');
+
+/* ============================================================
+   THE STRIPS  (newest last — the page shows newest first)
+   ============================================================ */
+const STRIPS = [
+  {
+    no: 1, date: '2026-11-19', title: 'The Experiment', tag: 'Together',
+    panels: [
+      () => panel('Sarah holds up an orange ball. Sarah: Hypothesis: a cat can balance a ball on her head if properly motivated. Tammy watches with huge eyes.',
+        SCENES.living() + sarah({ x: 120, y: 405, s: .95, arms: 'hold', hold: 'ball', face: 'excited' })
+        + tammy({ x: 292, y: 398, s: 1.02, face: 'wide' })
+        + say(210, 18, 340, 'Hypothesis: a cat can balance a ball on her head if properly motivated.', [140, 196])),
+      () => panel('Close-up of Tammy, wide-eyed and perfectly still, the orange ball balanced on her head. Caption: Minute 1. Sarah, off-panel: Incredible. Perfect stillness.',
+        R(0, 0, 400, 420, '#cfc6dc', 0, 0) + L('M0 300 Q200 270 400 300', 26, '#e9e3dc') + L('M0 360 Q200 330 400 360', 26, '#bfb4cc')
+        + tammy({ x: 205, y: 500, s: 1.95, face: 'wide', ballOnHead: true })
+        + caption(14, 14, 110, 'Minute 1.')
+        + say(270, 22, 220, 'Incredible. Perfect stillness.', [396, 150])),
+      () => panel('Sarah takes notes. Caption: Minute 47. Sarah: Subject shows remarkable discipline. Tammy, ball still on head, thinks: Discipline. Sure.',
+        SCENES.living() + sarah({ x: 112, y: 405, s: .95, arms: ['hold', 'write'], hold: 'notebook', face: 'smile', look: 3 })
+        + tammy({ x: 300, y: 398, s: 1, face: 'plot', ballOnHead: true })
+        + caption(14, 14, 120, 'Minute 47.')
+        + say(150, 62, 200, 'Subject shows remarkable discipline.', [120, 210])
+        + say(318, 128, 128, 'Discipline. Sure.', [300, 196], { thought: true, fs: 18 })),
+      () => panel('The ball and Tammy are gone. Under the couch: glowing cat eyes and a hoard of orange balls, hair ties, a sock and a pencil. Sarah, deadpan: Results: inconclusive. Caption: Balls under couch: 31. Hair ties: 9. Regrets: 0.',
+        (() => {
+          let s = SCENES.living();
+          s += R(140, 170, 270, 120, '#bba892', 26) + R(124, 250, 296, 66, '#c9b79f', 16) + E(140, 262, 26, 44, '#b09d87');
+          s += R(130, 316, 290, 30, '#231f2a', 0, 3);
+          const r = rng(7);
+          for (let i = 0; i < 18; i++) s += ball(150 + r() * 230, 326 + r() * 16, 6 + r() * 2);
+          s += L('M190 336 q8 -6 16 0 q8 6 16 0', 5, '#b29be0') + `<circle cx="262" cy="335" r="5" fill="none" stroke="#e46aa5" stroke-width="2.5"/><circle cx="350" cy="338" r="5" fill="none" stroke="#5fc0d8" stroke-width="2.5"/>`
+            + L('M300 342 L340 330', 4, '#f2c230');
+          s += E(304, 326, 6, 4.5, C.catEye, 1.5) + E(324, 326, 6, 4.5, C.catEye, 1.5) + E(304, 326, 1.2, 3.6, C.ink, 0) + E(324, 326, 1.2, 3.6, C.ink, 0);
+          s += sarah({ x: 72, y: 408, s: .86, arms: 'down', face: 'deadpan', look: 4 });
+          s += say(110, 26, 190, 'Results: inconclusive.', [90, 205]);
+          s += caption(218, 70, 168, 'Balls under couch: 31. Hair ties: 9. Regrets: 0.', 16);
+          return s;
+        })())
+    ]
+  },
+  {
+    no: 2, date: '2026-11-20', title: 'Method Acting', tag: 'Together',
+    panels: [
+      () => panel('Top-down view: Sarah lies spread-eagle inside a chalk outline, tongue out. Caption: Sarah has been cast as Body #2 in the school mystery play. Sarah: Shh. I am in character.',
+        SCENES.floor() + `<g filter="url(#chalk)">${sarah({ x: 200, y: 400, s: .9, arms: 'star', legs: 'star', face: 'dead' })}</g>`
+        + sarah({ x: 200, y: 400, s: .9, arms: 'star', legs: 'star', face: 'dead' })
+        + caption(14, 52, 210, 'Sarah has been cast as “Body #2” in the school mystery play.', 16)
+        + say(318, 56, 140, 'Shh. I’m in character.', [222, 160], { fs: 18 })),
+      () => panel('Tammy sits beside Sarah, who is still lying on the floor. Tammy thinks: A human. On the floor. Not paying attention to me.',
+        SCENES.floor() + `<g filter="url(#chalk)">${sarah({ x: 86, y: 480, s: 1.15, arms: 'star', legs: 'star', face: 'dead' })}</g>`
+        + sarah({ x: 86, y: 480, s: 1.15, arms: 'star', legs: 'star', face: 'dead' })
+        + tammy({ x: 292, y: 398, s: 1.08, face: 'plot' })
+        + say(250, 52, 260, 'A human. On the floor. Not paying attention to me.', [290, 196], { thought: true })),
+      () => panel('Tammy flops onto her back in her own chalk outline next to Sarah, paws in the air. Caption: Three seconds later. Sound effect: FLOP!',
+        SCENES.floor() + `<g filter="url(#chalk)">${sarah({ x: 128, y: 420, s: .84, arms: 'star', legs: 'star', face: 'dead' })}${tammy({ x: 318, y: 316, s: .82, pose: 'back', face: 'sleep' })}</g>`
+        + sarah({ x: 128, y: 420, s: .84, arms: 'star', legs: 'star', face: 'dead' })
+        + tammy({ x: 318, y: 316, s: .82, pose: 'back', face: 'sleep' })
+        + caption(14, 52, 170, 'Three seconds later.')
+        + sfx(300, 120, 'FLOP!', { size: 52, rot: 8 })),
+      () => panel('Sarah, standing with hands on hips, stares at Tammy, who lies blissfully on her back. Sarah: You cannot just FLOP into a murder mystery. Tammy thinks: Watch me. Caption: By opening night, Tammy had been cast as Body #3.',
+        SCENES.living('day') + sarah({ x: 112, y: 405, s: .95, arms: 'hip', face: 'deadpan', look: 4 })
+        + tammy({ x: 296, y: 338, s: .9, pose: 'back', face: 'smug' })
+        + say(190, 18, 340, 'You can’t just FLOP into a murder mystery.', [120, 200])
+        + say(330, 120, 100, 'Watch me.', [318, 196], { thought: true, fs: 18 })
+        + caption(200, 362, 188, 'By opening night, Tammy had been cast as Body #3.', 15))
+    ]
+  },
+  {
+    no: 3, date: '2026-11-21', title: 'Meanwhile', tag: 'Apart, then together',
+    panels: [
+      () => panel('At the gym, Sarah keeps score at a volleyball game behind a flip scoreboard reading zero to zero. Caption: 4:15 PM, the gym. Sarah, deadpan: Zero to zero. Riveting.',
+        (() => {
+          let s = SCENES.gym();
+          s += R(-10, 40, 120, 150, 'none', 0, 0) + `<g opacity=".9">${Array.from({ length: 8 }, (_, i) => L(`M0 ${60 + i * 16} L120 ${60 + i * 16}`, 1.5, '#2a2a2a')).join('')}${Array.from({ length: 8 }, (_, i) => L(`M${i * 16} 50 L${i * 16} 190`, 1.5, '#2a2a2a')).join('')}</g>`
+            + L('M0 50 L124 50', 6, '#f2f2f2') + R(118, 40, 26, 300, '#1f1e24', 3) + R(118, 40, 26, 40, '#c43b3b', 0, 0);
+          s += sarah({ x: 290, y: 382, s: 1, arms: 'hold', face: 'deadpan' });
+          s += R(150, 300, 250, 16, '#e9e7e2', 3) + L('M170 316 L190 420 M380 316 L360 420', 5, '#555');
+          s += R(170, 238, 214, 62, '#1d1c22', 4, 3);
+          for (const [cx, col] of [[178, '#2e63c9'], [214, '#2e63c9'], [306, '#d63b3b'], [342, '#d63b3b']])
+            s += R(cx, 244, 32, 50, col, 4, 2) + `<text x="${cx + 16}" y="284" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="38" fill="#fff">0</text>`;
+          s += `<text x="276" y="276" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="24" fill="#f2c230">1</text>`;
+          s += E(60, 262, 20, 20, '#f6f6f2') + L('M44 254 Q60 262 76 254 M52 244 Q58 262 52 280', 2) + motion([[84, 250, 120, 240], [86, 266, 128, 262], [82, 280, 116, 284]], 2.5);
+          s += caption(14, 14, 180, '4:15 PM — the gym.');
+          s += say(250, 70, 210, 'Zero to zero. Riveting.', [292, 206]);
+          return s;
+        })()),
+      () => panel('Meanwhile at home, Tammy lounges smugly on the forbidden top shelf of the garage while a box she knocked off falls. Caption: 4:15 PM, the garage. Tammy has reached the Forbidden Shelf. Sound effect: KLUNK.',
+        (() => {
+          let s = SCENES.garage();
+          s += E(30, 230, 50, 70, '#22222a') + R(40, 236, 80, 64, '#2a8f99', 6);
+          s += R(120, 248, 300, 54, '#7d4fd0', 22);
+          s += tammy({ x: 268, y: 296, s: 1.05, pose: 'loaf', face: 'smug' });
+          s += R(0, 300, 400, 12, '#9ea3aa', 2) + R(10, 312, 400, 44, '#2f5fcf', 14) + R(150, 318, 170, 20, '#efeadf', 2, 1.5);
+          s += R(0, 356, 400, 64, '#2a2a30', 0, 0);
+          s += G('rotate(28 90 382)', R(60, 356, 60, 46, '#c79a5b', 3) + L('M60 372 L120 372', 2.5));
+          s += motion([[70, 330, 62, 300], [96, 326, 92, 296], [122, 334, 122, 306]], 2.5);
+          s += sfx(200, 404, 'KLUNK!', { size: 44, rot: -6 });
+          s += caption(14, 14, 230, '4:15 PM — the garage. Tammy has reached the Forbidden Shelf.', 16);
+          s += say(320, 130, 140, 'Gravity check: still works.', [296, 220], { thought: true, fs: 17 });
+          return s;
+        })()),
+      () => panel('Tammy spins gleefully on a blue desk chair with motion lines swirling around her. Caption: 4:32 PM. Unauthorized desk chair rotations: 46. Sound effect: WHEEEE.',
+        SCENES.office() + `<g opacity=".5">${L('M60 260 C40 200 120 150 200 150 C300 150 360 210 340 260', 4)}${L('M80 300 C70 340 330 350 330 300', 4)}</g>`
+        + chair(200, 404, 1.04) + tammy({ x: 200, y: 268, s: .85, face: 'happy' })
+        + motion([[58, 160, 30, 150], [56, 186, 26, 186], [344, 160, 372, 150], [346, 186, 376, 186]])
+        + caption(14, 14, 236, '4:32 PM — Unauthorized desk chair rotations: 46.', 16)
+        + sfx(320, 100, 'WHEEEE!', { size: 34, rot: 10, fill: '#5fc0d8' })),
+      () => panel('Evening. Sarah comes home with her backpack to find Tammy curled up asleep on the desk chair, surrounded by a tipped box, scattered papers and an orange ball. Sarah: So. Quiet day? Tammy: Zzz. Caption: Her alibi: airtight.',
+        (() => {
+          let s = SCENES.living('eve');
+          s += chair(300, 404, .88) + tammy({ x: 300, y: 290, s: .62, pose: 'loaf', face: 'sleep' });
+          s += sarah({ x: 104, y: 406, s: .94, arms: 'down', face: 'skeptical', look: 4, backpack: true });
+          s += G('rotate(-14 214 388)', R(186, 366, 56, 40, '#c79a5b', 3)) + G('rotate(10 240 404)', R(220, 396, 34, 22, '#fff', 1, 2)) + G('rotate(-22 168 408)', R(152, 400, 30, 20, '#fff', 1, 2));
+          s += ball(262, 398, 10);
+          for (const [px, py] of [[160, 382], [184, 392], [210, 378]]) s += E(px, py, 4, 3, '#6a5f66', 0) + `<circle cx="${px - 4}" cy="${py - 5}" r="1.6" fill="#6a5f66"/><circle cx="${px}" cy="${py - 6.5}" r="1.6" fill="#6a5f66"/><circle cx="${px + 4}" cy="${py - 5}" r="1.6" fill="#6a5f66"/>`;
+          s += say(140, 20, 190, 'So. Quiet day?', [118, 206]);
+          s += say(318, 98, 90, 'Zzz.', [306, 222], { fs: 18 });
+          s += caption(224, 30, 156, 'Her alibi: airtight.', 16);
+          return s;
+        })())
+    ]
+  }
+];
+
+/* ---------------- RENDER ---------------- */
+function fmt(d) { return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }); }
+const host = document.getElementById('strips');
+for (const st of [...STRIPS].reverse()) {
+  const sec = document.createElement('article');
+  sec.className = 'strip'; sec.id = 'no-' + st.no;
+  sec.innerHTML = `<header><span class="no">No. ${st.no}</span><h2>${esc(st.title)}</h2><span class="tag">${esc(st.tag)}</span><span class="date">${fmt(st.date)}</span></header>`
+    + `<div class="panels">${st.panels.map(p => p()).join('')}</div>`;
+  host.appendChild(sec);
+}
+document.getElementById('issue-range').textContent = `Strips 1–${STRIPS.length} · updated ${fmt(STRIPS[STRIPS.length - 1].date)}`;
+const mini = (body) => `<svg viewBox="0 0 400 420" aria-hidden="true">${body}</svg>`;
+document.getElementById('cast-sarah').innerHTML = mini(R(0, 0, 400, 420, '#dcdff0', 40, 0) + sarah({ x: 200, y: 470, s: 1.45, arms: ['down', 'wave'], face: 'smirk' }));
+document.getElementById('cast-tammy').innerHTML = mini(R(0, 0, 400, 420, '#cfc6dc', 40, 0) + tammy({ x: 190, y: 400, s: 1.55, face: 'smug', raise: true }));
+</script>
