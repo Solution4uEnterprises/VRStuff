@@ -92,7 +92,7 @@ footer { margin-top: 40px; color: var(--muted); font-family: var(--hand); font-s
     <div class="cast-grid">
       <div class="who"><div id="cast-sarah"></div><div>
         <h3>Sarah</h3><p class="role">age 14 · resident genius</p>
-        <p>Keeps score, keeps notes, keeps a perfectly straight face. Wears a daisy cardigan and striped arm warmers, delivers a world-class side-eye, and will play dead on any floor if the role calls for it.</p>
+        <p>Keeps score, keeps notes, keeps a perfectly straight face. Lives in a maroon hoodie that says “Sorry I’m late, I didn’t want to come,” plus red sneakers, headphones and grey arm warmers. Delivers a world-class side-eye and will play dead on any floor if the role calls for it.</p>
       </div></div>
       <div class="who"><div id="cast-tammy"></div><div>
         <h3>Tammy</h3><p class="role">cat · slightly mischievous (allegedly)</p>
@@ -199,6 +199,7 @@ footer { margin-top: 40px; color: var(--muted); font-family: var(--hand); font-s
 const C = {
   ink: '#2a2433', skin: '#f8dccb', hair: '#5a3a27', hairHi: '#7b5238', glass: '#8b7fa3',
   cardigan: '#1f1e27', warmer: '#8e899b', pants: '#4d3576', shoe: '#1d1b22',
+  hoodie: '#7a1f33', hoodieDk: '#5e1626', flares: '#6e1a2e', khaki: '#d3c6a6', sneaker: '#cc2b2b', sock: '#f1edf4',
   cat: '#636b78', catDk: '#4f5662', catW: '#f6f4ef', earIn: '#c9a1a5', bean: '#55474c', beanPink: '#e9a29d',
   catEye: '#d9d35a', collar: '#141418', ball: '#ef5a33', white: '#ffffff', cap: '#fff2a6'
 };
@@ -226,11 +227,11 @@ const ARMS = { // right-side positions (left mirrors x)
   up: { e: [62, -182], h: [64, -222] }, shrug: { e: [66, -116], h: [90, -140] },
   star: { e: [84, -170], h: [120, -194] }, write: { e: [56, -104], h: [26, -122] }
 };
-function sarahArm(sx, preset) {
+function sarahArm(sx, preset, sleeve = C.cardigan) {
   const a = ARMS[preset] || ARMS.down;
   const sh = [38 * sx, -146], e = [a.e[0] * sx, a.e[1]], h = [a.h[0] * sx, a.h[1]];
   const m = [e[0] + (h[0] - e[0]) * .45, e[1] + (h[1] - e[1]) * .45];
-  return limb([sh, e, h], 14, C.cardigan) + L(`M${m.join(' ')} L${h.join(' ')}`, 13, C.warmer)
+  return limb([sh, e, h], 14, sleeve) + L(`M${m.join(' ')} L${h.join(' ')}`, 13, C.warmer)
     + L(`M${(m[0] * .6 + h[0] * .4)} ${(m[1] * .6 + h[1] * .4)} l0.1 0.1`, 13, '#a9a4b6')
     + `<circle cx="${h[0]}" cy="${h[1]}" r="8" fill="${C.skin}" ${INK} stroke-width="2.5"/>`;
 }
@@ -280,29 +281,51 @@ function sarahBrows(f) {
   }[b];
   return L(d, 3);
 }
-/** Sarah. Origin = between her feet. opts: arms ('down' | [left,right]), face, flip, legs ('stand'|'star'|'walk'), hold ('ball'|'notebook'), backpack */
-function sarah({ x = 0, y = 0, s = 1, flip = false, arms = 'down', face = 'neutral', legs = 'stand', look = 0, hold = '', backpack = false } = {}) {
+/** Sarah. Origin = between her feet. opts: arms ('down' | [left,right]), face, flip, legs ('stand'|'star'|'walk'), hold ('ball'|'notebook'|'laser'), backpack,
+ *  outfit: 'daisy' (tie-dye tee + daisy cardigan + purple pants) | 'hoodie' (maroon "Sorry I'm late" hoodie + maroon flares + red sneakers)
+ *          | 'cargo' (same hoodie + khaki cargo pants + socks, for indoors)
+ *  hair: 'long' | 'shoulder' (her current cut), glasses: true/false, headphones: true/false */
+function sarah({ x = 0, y = 0, s = 1, flip = false, arms = 'down', face = 'neutral', legs = 'stand', look = 0, hold = '', backpack = false,
+  outfit = 'daisy', hair = 'long', glasses = true, headphones = false } = {}) {
+  const hood = outfit === 'hoodie' || outfit === 'cargo', sleeve = hood ? C.hoodie : C.cardigan;
   const [la, ra] = Array.isArray(arms) ? arms : [arms, arms];
   const legRot = { stand: [0, 0], star: [20, -20], walk: [10, -8] }[legs] || [0, 0];
   const hs = CUR.head || 1, bs = CUR.body || 1, bw = CUR.bodyW || 1, gr = CUR.glassR || 15;
   const headT = `translate(0 ${-158 * bs}) scale(${hs}) translate(0 158)`;
   // back hair (moves with the head)
-  let g = G(headT, P('M-54 -206 C-58 -272 58 -272 54 -206 C60 -150 64 -112 50 -92 L-50 -92 C-64 -112 -60 -150 -54 -206 Z', C.hair)
-    + shade('M38 -230 C58 -170 62 -120 50 -92 L34 -92 C44 -140 46 -190 38 -230 Z'));
+  let g = G(headT, hair === 'shoulder'
+    ? P('M-54 -206 C-58 -272 58 -272 54 -206 C58 -182 62 -160 58 -146 C40 -150 -40 -150 -58 -146 C-62 -160 -58 -182 -54 -206 Z', C.hair) + shade('M38 -230 C56 -196 62 -164 58 -146 L40 -148 C46 -176 46 -204 38 -230 Z')
+    : P('M-54 -206 C-58 -272 58 -272 54 -206 C60 -150 64 -112 50 -92 L-50 -92 C-64 -112 -60 -150 -54 -206 Z', C.hair) + shade('M38 -230 C58 -170 62 -120 50 -92 L34 -92 C44 -140 46 -190 38 -230 Z'));
   let b = '';
   if (backpack) b += R(-50, -150, 100, 78, '#3f6e8c', 16);
   const leg = (sx, rot) => G(`rotate(${rot} ${18 * sx} -74)`,
-    P(`M${6 * sx} -76 L${36 * sx} -76 L${40 * sx} -10 L${6 * sx} -10 Z`, C.pants) + (sx > 0 ? shade('M24 -76 L36 -76 L40 -10 L29 -10 Z') : '') + E(24 * sx, -6, 19, 8, C.shoe));
+    (outfit === 'hoodie' ? P(`M${6 * sx} -76 L${36 * sx} -76 L${46 * sx} -12 L${2 * sx} -12 Z`, C.flares)
+      : outfit === 'cargo' ? P(`M${6 * sx} -76 L${36 * sx} -76 L${38 * sx} -14 L${8 * sx} -14 Z`, C.khaki) + R(sx > 0 ? 30 : -42, -58, 12, 16, C.khaki, 2, 2) + L(`M${8 * sx} -22 L${38 * sx} -22`, 2)
+      : P(`M${6 * sx} -76 L${36 * sx} -76 L${40 * sx} -10 L${6 * sx} -10 Z`, C.pants))
+    + (sx > 0 ? shade('M24 -76 L36 -76 L40 -10 L29 -10 Z') : '')
+    + (outfit === 'hoodie' ? E(24 * sx, -7, 20, 9, C.sneaker) + L(`M${6 * sx} -2 L${42 * sx} -2`, 4, '#fff') + L(`M${18 * sx} -12 l6 -2 M${20 * sx} -8 l6 -2`, 1.6, '#fff')
+      : outfit === 'cargo' ? E(23 * sx, -6, 17, 8, C.sock) + E(34 * sx, -6, 7, 6, '#b79fd8', 0)
+      : E(24 * sx, -6, 19, 8, C.shoe)));
   b += leg(-1, legRot[0]) + leg(1, legRot[1]);
   b += R(-9, -168, 18, 16, C.skin, 3, 2.5) + shade('M-9 -168 L9 -168 L9 -158 L-9 -158 Z');
-  b += P('M-40 -148 Q-42 -158 -28 -158 L28 -158 Q42 -158 40 -148 L42 -70 L-42 -70 Z', 'url(#tiedye)');
-  b += P('M-40 -148 Q-42 -158 -28 -158 L-14 -158 L-11 -70 L-42 -70 Z', C.cardigan) + P('M40 -148 Q42 -158 28 -158 L14 -158 L11 -70 L42 -70 Z', C.cardigan);
-  for (const [dx, dy] of [[-30, -142], [-21, -120], [-33, -100], [-23, -80], [27, -136], [33, -112], [22, -96], [31, -78]])
-    b += `<circle cx="${dx}" cy="${dy}" r="4.2" fill="#fff"/><circle cx="${dx}" cy="${dy}" r="1.7" fill="#f2c230"/>`;
-  b += shade('M-11 -158 L11 -158 L4 -140 L-4 -140 Z') + shade('M14 -158 L28 -158 Q42 -158 40 -148 L42 -70 L30 -70 Z');
+  if (hood) {
+    b += P('M-30 -158 C-34 -178 34 -178 30 -158 Z', C.hoodieDk);
+    b += P('M-44 -146 Q-46 -160 -30 -160 L30 -160 Q46 -160 44 -146 L46 -60 L-46 -60 Z', C.hoodie);
+    b += P('M-26 -92 L26 -92 L32 -64 L-32 -64 Z', C.hoodieDk, 2) + L('M-6 -158 L-7 -138 M6 -158 L7 -138', 2, '#f3e9ea');
+    b += `<text text-anchor="middle" font-family="Lilita One, sans-serif" font-size="8.6" fill="#fff" letter-spacing=".3">`
+      + ['SORRY I\'M LATE', 'I DIDN\'T WANT', 'TO COME'].map((t, i) => `<tspan x="0" y="${-124 + i * 10}">${t}</tspan>`).join('') + '</text>';
+    b += shade('M26 -160 L30 -160 Q46 -160 44 -146 L46 -60 L32 -60 Z');
+  } else {
+    b += P('M-40 -148 Q-42 -158 -28 -158 L28 -158 Q42 -158 40 -148 L42 -70 L-42 -70 Z', 'url(#tiedye)');
+    b += P('M-40 -148 Q-42 -158 -28 -158 L-14 -158 L-11 -70 L-42 -70 Z', C.cardigan) + P('M40 -148 Q42 -158 28 -158 L14 -158 L11 -70 L42 -70 Z', C.cardigan);
+    for (const [dx, dy] of [[-30, -142], [-21, -120], [-33, -100], [-23, -80], [27, -136], [33, -112], [22, -96], [31, -78]])
+      b += `<circle cx="${dx}" cy="${dy}" r="4.2" fill="#fff"/><circle cx="${dx}" cy="${dy}" r="1.7" fill="#f2c230"/>`;
+    b += shade('M-11 -158 L11 -158 L4 -140 L-4 -140 Z') + shade('M14 -158 L28 -158 Q42 -158 40 -148 L42 -70 L30 -70 Z');
+  }
   if (backpack) b += L('M-26 -156 L-22 -72 M26 -156 L22 -72', 6, '#2c4f66');
-  b += sarahArm(-1, la) + sarahArm(1, ra);
+  b += sarahArm(-1, la, sleeve) + sarahArm(1, ra, sleeve);
   if (hold === 'ball') b += ball(0, -122, 15);
+  if (hold === 'laser') { const hp = ARMS[ra] || ARMS.down; b += G(`translate(${hp.h[0]} ${hp.h[1]}) rotate(${ra === 'point' ? 0 : 60})`, R(-2, -4, 22, 7, '#2b2a30', 3, 1.5) + `<circle cx="21" cy="-0.5" r="2" fill="#ff2d4a"/>`); }
   if (hold === 'notebook') b += G('rotate(-8 0 -120)', R(-34, -142, 50, 36, '#fff', 3, 2.5) + L('M-28 -132 L8 -132 M-28 -124 L10 -124 M-28 -116 L4 -116', 1.6, '#9db4d8'))
     + L('M26 -122 L40 -146', 4, '#f2c230') + L('M26 -122 L29 -127', 4, C.ink);
   b += soft(0, -114, 44, 46);
@@ -312,7 +335,7 @@ function sarah({ x = 0, y = 0, s = 1, flip = false, arms = 'down', face = 'neutr
   h += shade('M-46 -216 C-36 -234 -18 -238 -8 -231 C2 -240 14 -240 20 -229 C30 -236 40 -230 46 -216 C30 -208 -30 -208 -46 -216 Z')
     + shade('M28 -244 C52 -222 50 -180 22 -159 C40 -184 42 -216 28 -244 Z');
   h += sarahFace(face, look);
-  h += `<circle cx="-19" cy="-200" r="${gr}" fill="rgba(255,255,255,.22)" stroke="${CUR.glassCol || C.glass}" stroke-width="${3.5 * (CUR.glassW || 1)}"/><circle cx="19" cy="-200" r="${gr}" fill="rgba(255,255,255,.22)" stroke="${CUR.glassCol || C.glass}" stroke-width="${3.5 * (CUR.glassW || 1)}"/>`
+  if (glasses) h += `<circle cx="-19" cy="-200" r="${gr}" fill="rgba(255,255,255,.22)" stroke="${CUR.glassCol || C.glass}" stroke-width="${3.5 * (CUR.glassW || 1)}"/><circle cx="19" cy="-200" r="${gr}" fill="rgba(255,255,255,.22)" stroke="${CUR.glassCol || C.glass}" stroke-width="${3.5 * (CUR.glassW || 1)}"/>`
     + L(`M${-19 + gr} -202 Q0 -205 ${19 - gr} -202`, 3, CUR.glassCol || C.glass) + L(`M${-19 - gr} -203 L-46 -207 M${19 + gr} -203 L46 -207`, 3, CUR.glassCol || C.glass);
   h += P('M-47 -214 C-50 -264 50 -264 47 -214 C40 -230 30 -236 20 -229 C12 -241 -2 -241 -8 -231 C-18 -241 -36 -236 -47 -214 Z', C.hair);
   h += shade('M14 -238 C30 -252 44 -240 47 -214 C40 -230 30 -236 20 -229 Z');
@@ -320,6 +343,8 @@ function sarah({ x = 0, y = 0, s = 1, flip = false, arms = 'down', face = 'neutr
   if (CUR.strands) h += L('M-30 -250 C-40 -230 -46 -205 -44 -170 M-12 -256 C-20 -240 -24 -236 -26 -232 M30 -248 C42 -230 48 -200 46 -168 M10 -256 C16 -246 18 -240 18 -234', 1.4, C.hairHi);
   h += L('M-20 -252 C-8 -258 10 -258 22 -250', 3, C.hairHi);
   h += sarahBrows(face);
+  if (headphones) h += L('M-50 -214 C-56 -282 56 -282 50 -214', 13) + L('M-50 -214 C-56 -282 56 -282 50 -214', 7, '#2b2a30')
+    + R(-62, -230, 18, 34, '#2b2a30', 8) + R(44, -230, 18, 34, '#2b2a30', 8) + L('M-58 -222 L-58 -204 M58 -222 L58 -204', 2, '#55535c');
   h += soft(0, -210, 50, 54);
   g += G(headT, h);
   return G(`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`, g);
@@ -488,6 +513,19 @@ const SCENES = {
   },
   office: () => R(0, 0, 400, 420, '#e7eaf3', 0, 0) + R(0, 330, 400, 90, '#bdb4aa', 0, 0) + L('M0 330 L400 330', 3)
     + R(300, 40, 120, 290, '#2a2a2f', 0, 3) + `<text x="355" y="120" transform="rotate(90 355 120)" font-family="Nunito, sans-serif" font-weight="800" font-size="22" fill="#55555c">pilates</text>`,
+  /* The family room: grey wall + teal accent wall, white mantel over a black-tile fireplace, black-and-white rug. */
+  den: () => {
+    let s = R(0, 0, 400, 420, '#dcdde2', 0, 0) + R(250, 0, 150, 420, '#8fb6ac', 0, 0) + L('M250 0 L250 330', 2, 'rgba(0,0,0,.15)');
+    s += R(262, 168, 150, 162, '#f4f4f2', 0, 2.5) + R(256, 160, 160, 14, '#ffffff', 2, 2.5);
+    s += R(276, 184, 124, 146, '#18171b', 0, 2);
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 4; c++) s += R(278 + c * 31 + (r % 2) * 15, 186 + r * 20, 28, 17, '#2d2c33', 3, 0);
+    s += R(300, 236, 80, 94, '#0e0d10', 2, 2);
+    s += R(0, 330, 400, 90, '#6f6d72', 0, 0) + L('M0 330 L400 330', 3);
+    for (let i = 0; i < 5; i++) s += L(`M0 ${346 + i * 16} L400 ${346 + i * 16}`, 1.4, 'rgba(0,0,0,.18)');
+    s += P('M60 420 L120 352 L400 352 L400 420 Z', '#f2f0ea', 0);
+    s += L('M110 364 L400 364 M95 382 L400 382 M80 400 L400 400 M150 352 L120 420 M210 352 L190 420 M270 352 L260 420 M330 352 L330 420', 4, '#2a2830');
+    return s;
+  },
   /* Backyard in fall: sky, picket fence, a maple, grass with fallen leaves (n = how many on the ground). */
   yard: (n = 10, seed = 3) => {
     let s = R(0, 0, 400, 420, '#a9d3ee', 0, 0) + E(80, 60, 60, 18, '#e8f3fb', 0) + E(300, 40, 50, 14, '#e8f3fb', 0);
@@ -500,6 +538,15 @@ const SCENES = {
     return s;
   }
 };
+/** Laser-pointer dot (Tammy's nemesis). */
+const laserDot = (x, y) => `<circle cx="${x}" cy="${y}" r="13" fill="#ff2d4a" opacity=".18"/><circle cx="${x}" cy="${y}" r="5" fill="#ff2d4a"/><circle cx="${x - 1.5}" cy="${y - 1.5}" r="1.8" fill="#fff" opacity=".8"/>`;
+/** The beige recliner couch with dark leather base, left edge at x, floor at y. */
+function couch(x, y, w = 260) {
+  return R(x, y - 150, w, 80, '#b3a38d', 22) + R(x - 6, y - 62, w + 12, 54, '#2a2426', 10)
+    + R(x + 8, y - 92, w - 16, 40, '#c2b29b', 14) + L(`M${x + w / 2} ${y - 90} L${x + w / 2} ${y - 54}`, 2)
+    + R(x - 18, y - 104, 40, 92, '#2a2426', 14) + R(x - 16, y - 110, 38, 22, '#b3a38d', 10)
+    + R(x + w - 22, y - 104, 40, 92, '#2a2426', 14) + R(x + w - 22, y - 110, 38, 22, '#b3a38d', 10);
+}
 const LEAF_COLS = ['#e8792b', '#d9452f', '#f2b134', '#b8542a', '#e35b2a', '#c9a227'];
 function leaf(x, y, sc = 1, rot = 0, col = '#e8792b') {
   return G(`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)}) scale(${sc.toFixed(2)})`,
@@ -741,7 +788,7 @@ document.getElementById('tryout-grid').innerHTML = TRYOUT_LOOKS.map(k => [k, STY
 CUR = STYLES.classic;
 document.getElementById('issue-range').textContent = `Strips 1–${STRIPS.length} · updated ${fmt(STRIPS[STRIPS.length - 1].date)}`;
 const mini = (body) => `<svg viewBox="0 0 400 420" aria-hidden="true">${body}</svg>`;
-document.getElementById('cast-sarah').innerHTML = mini(R(0, 0, 400, 420, '#dcdff0', 40, 0) + sarah({ x: 200, y: 470, s: 1.45, arms: ['down', 'wave'], face: 'smirk' }));
+document.getElementById('cast-sarah').innerHTML = mini(R(0, 0, 400, 420, '#dcdff0', 40, 0) + sarah({ x: 200, y: 470, s: 1.45, arms: ['down', 'wave'], face: 'smirk', outfit: 'hoodie', hair: 'shoulder', headphones: true }));
 document.getElementById('cast-tammy').innerHTML = mini(R(0, 0, 400, 420, '#cfc6dc', 40, 0) + tammy({ x: 190, y: 400, s: 1.55, face: 'smug', raise: true }));
 </script>
 
