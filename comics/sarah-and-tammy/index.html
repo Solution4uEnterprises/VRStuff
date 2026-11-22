@@ -487,8 +487,43 @@ const SCENES = {
     return s;
   },
   office: () => R(0, 0, 400, 420, '#e7eaf3', 0, 0) + R(0, 330, 400, 90, '#bdb4aa', 0, 0) + L('M0 330 L400 330', 3)
-    + R(300, 40, 120, 290, '#2a2a2f', 0, 3) + `<text x="355" y="120" transform="rotate(90 355 120)" font-family="Nunito, sans-serif" font-weight="800" font-size="22" fill="#55555c">pilates</text>`
+    + R(300, 40, 120, 290, '#2a2a2f', 0, 3) + `<text x="355" y="120" transform="rotate(90 355 120)" font-family="Nunito, sans-serif" font-weight="800" font-size="22" fill="#55555c">pilates</text>`,
+  /* Backyard in fall: sky, picket fence, a maple, grass with fallen leaves (n = how many on the ground). */
+  yard: (n = 10, seed = 3) => {
+    let s = R(0, 0, 400, 420, '#a9d3ee', 0, 0) + E(80, 60, 60, 18, '#e8f3fb', 0) + E(300, 40, 50, 14, '#e8f3fb', 0);
+    s += R(0, 170, 400, 10, '#b98d5f', 0, 0) + R(0, 250, 400, 10, '#b98d5f', 0, 0);
+    for (let i = 0; i < 12; i++) s += P(`M${i * 36 + 2} 320 L${i * 36 + 2} 150 L${i * 36 + 15} 136 L${i * 36 + 28} 150 L${i * 36 + 28} 320 Z`, '#d8b48a', 2);
+    s += R(0, 300, 400, 120, '#8fb15a', 0, 0) + L('M0 300 L400 300', 3);
+    for (let i = 0; i < 14; i++) s += L(`M${14 + i * 29} ${330 + (i % 3) * 26} l3 -9 l3 9`, 2, '#6f9440');
+    const r = rng(seed);
+    for (let i = 0; i < n; i++) s += leaf(r() * 400, 312 + r() * 100, 1 + r() * .5, r() * 360, LEAF_COLS[i % LEAF_COLS.length]);
+    return s;
+  }
 };
+const LEAF_COLS = ['#e8792b', '#d9452f', '#f2b134', '#b8542a', '#e35b2a', '#c9a227'];
+function leaf(x, y, sc = 1, rot = 0, col = '#e8792b') {
+  return G(`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)}) scale(${sc.toFixed(2)})`,
+    P('M0 -9 C7 -5 7 5 0 9 C-7 5 -7 -5 0 -9 Z', col, 1) + L('M0 -8 L0 11', 1.2, 'rgba(60,30,20,.45)'));
+}
+/** A raked leaf pile: dome centred on cx, sitting on y = by. */
+function leafPile(cx, by, w, h, seed = 5) {
+  let s = P(`M${cx - w / 2} ${by} C${cx - w / 2} ${by - h * 1.3} ${cx + w / 2} ${by - h * 1.3} ${cx + w / 2} ${by} Z`, '#c8642c');
+  s += shade(`M${cx + w * .12} ${by - h * .96} C${cx + w * .4} ${by - h * .8} ${cx + w / 2} ${by - h * .3} ${cx + w / 2} ${by} L${cx + w * .22} ${by} C${cx + w * .32} ${by - h * .4} ${cx + w * .28} ${by - h * .75} ${cx + w * .12} ${by - h * .96} Z`);
+  const r = rng(seed);
+  for (let i = 0; i < Math.round(w / 3.2); i++) { const u = r() * 2 - 1, v = r(); s += leaf(cx + u * w * .45, by - 6 - v * (h - 10) * (1 - u * u * .85), 1.1 + r() * .5, r() * 360, LEAF_COLS[i % LEAF_COLS.length]); }
+  return s;
+}
+/** Leaf rake standing upright: handle top at (x, top), tines touching the ground at y = by. */
+function rake(x, top, by) {
+  return limb([[x, top], [x, by - 30]], 6, '#c08a4e')
+    + P(`M${x - 4} ${by - 34} L${x + 4} ${by - 34} L${x + 30} ${by} L${x - 30} ${by} Z`, '#3d9a62', 2)
+    + L(Array.from({ length: 7 }, (_, i) => `M${x} ${by - 30} L${x - 27 + i * 9} ${by}`).join(' '), 1.6, '#24603b');
+}
+/** Judge's scorecard, centred on (x, y). */
+function scorecard(x, y, text, rot = 0) {
+  return G(`rotate(${rot} ${x} ${y})`, R(x - 38, y - 28, 76, 56, '#fff', 5, 2.5) + R(x - 38, y - 28, 76, 12, '#3d5f94', 4, 0)
+    + `<text x="${x}" y="${y + 21}" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="34" fill="${C.ink}">${esc(text)}</text>`);
+}
 /* Art styles: each strip can carry style: '<key>'. A style re-treats the same drawings
    (filters, texture overlays, lettering) so different looks can be compared. */
 const STYLES = {
@@ -648,6 +683,43 @@ const STRIPS = [
           return s;
         })())
     ]
+  },
+  {
+    no: 4, date: '2026-11-21', title: 'The Perfect Pile', tag: 'Together', style: 'webcomic',
+    panels: [
+      () => panel('Saturday in the backyard. Sarah leans on a rake beside a tall, perfectly round pile of fall leaves, looking proud. Tammy peeks over the top of the pile with huge eyes. Caption: Saturday. Yard duty. Sarah: Forty minutes. One perfect pile. Nobody touch it.',
+        SCENES.yard(8, 3) + tammy({ x: 334, y: 340, s: .66, face: 'wide' }) + leafPile(296, 372, 190, 112, 5)
+        + sarah({ x: 102, y: 405, s: .9, arms: ['hip', 'shrug'], face: 'smile' }) + rake(173, 200, 400)
+        + caption(14, 14, 182, 'Saturday. Yard duty.')
+        + say(256, 62, 260, 'Forty minutes. One perfect pile. Nobody touch it.', [132, 152])),
+      () => panel('Tammy crouches low in the grass facing the leaf pile, pupils enormous, rear end wiggling. Sarah, from off-panel: Tammy. Don’t. Tammy thinks: She said “perfect.” Perfect is a dare.',
+        SCENES.yard(12, 9) + leafPile(340, 380, 170, 100, 11)
+        + tammy({ x: 170, y: 392, s: 1.15, pose: 'walk', face: 'wide' })
+        + motion([[68, 300, 54, 292], [64, 318, 46, 318], [70, 336, 54, 344]], 3)
+        + say(110, 26, 180, 'Tammy. Don’t.', [-6, 200])
+        + say(286, 104, 196, 'She said “perfect.” Perfect is a dare.', [240, 246], { thought: true })),
+      () => panel('The leaf pile explodes as Tammy launches through it, leaves bursting in every direction. Sarah stands at the edge of the panel, wide-eyed, rake falling. Sound effect: FWOOMP!',
+        (() => {
+          let s = SCENES.yard(10, 21) + leafPile(270, 400, 220, 46, 17);
+          const r = rng(41);
+          for (let i = 0; i < 46; i++) { const a = -Math.PI * (.05 + r() * .9), d = 40 + r() * 170; s += leaf(270 + Math.cos(a) * d, 340 + Math.sin(a) * d, 1.1 + r() * .7, r() * 360, LEAF_COLS[i % LEAF_COLS.length]); }
+          s += motion([[180, 330, 160, 300], [360, 330, 384, 300], [270, 300, 270, 270]], 3);
+          s += G('rotate(-20 262 226)', tammy({ x: 262, y: 286, s: .95, pose: 'walk', face: 'happy' }));
+          s += G('rotate(-24 120 400)', rake(120, 230, 400));
+          s += sarah({ x: 64, y: 405, s: .82, arms: ['down', 'shrug'], face: 'surprised' });
+          s += sfx(236, 82, 'FWOOMP!', { size: 58, rot: -7 });
+          return s;
+        })()),
+      () => panel('Leaves are scattered across the whole yard. Tammy lies on her back in them, paws in the air, looking delighted. Sarah, deadpan, holds up a judge’s scorecard reading 9.4. Sarah: Nine point four. You under-rotated on the dismount. Tammy thinks: Re-rake it. I’m going again.',
+        (() => {
+          let s = SCENES.yard(48, 33);
+          s += tammy({ x: 296, y: 382, s: .82, pose: 'back', face: 'happy' }) + leaf(300, 344, 1.5, 30, '#d9452f') + leaf(250, 340, 1.4, -60, '#f2b134');
+          s += sarah({ x: 92, y: 405, s: .9, arms: ['hip', 'star'], face: 'deadpan', look: 4 }) + scorecard(196, 168, '9.4', 6);
+          s += say(140, 14, 252, 'Nine point four. You under-rotated on the dismount.', [70, 152]);
+          s += say(322, 166, 136, 'Re-rake it. I’m going again.', [300, 262], { thought: true, fs: 18 });
+          return s;
+        })())
+    ]
   }
 ];
 
@@ -672,3 +744,4 @@ const mini = (body) => `<svg viewBox="0 0 400 420" aria-hidden="true">${body}</s
 document.getElementById('cast-sarah').innerHTML = mini(R(0, 0, 400, 420, '#dcdff0', 40, 0) + sarah({ x: 200, y: 470, s: 1.45, arms: ['down', 'wave'], face: 'smirk' }));
 document.getElementById('cast-tammy').innerHTML = mini(R(0, 0, 400, 420, '#cfc6dc', 40, 0) + tammy({ x: 190, y: 400, s: 1.55, face: 'smug', raise: true }));
 </script>
+
