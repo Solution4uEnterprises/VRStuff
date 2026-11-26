@@ -215,7 +215,7 @@ const G = (t, inner, extra = '') => `<g transform="${t}" ${extra}>${inner}</g>`;
 const limb = (pts, w, col) => { const d = 'M' + pts.map(p => p.join(' ')).join(' L'); return `<path d="${d}" fill="none" stroke="${C.ink}" stroke-width="${w + 6 * LW()}" stroke-linecap="round" stroke-linejoin="round"/>` + L(d, w, col); };
 /* Style-aware shading. Modes: cel (flat shadow shapes), hatch (cross-hatching), soft (3D-ish gradients). */
 const shade = d => { const m = typeof CUR !== 'undefined' && CUR.shade; if (!m || m === 'soft') return '';
-  return m === 'hatch' ? Pn(d, 'url(#hatch)', 'opacity=".7"') : Pn(d, CUR.shadeCol || 'rgba(60,30,80,.24)'); };
+  return m === 'hatch' ? Pn(d, 'url(#hatch)', 'opacity=".42"') : Pn(d, CUR.shadeCol || 'rgba(60,30,80,.24)'); };
 const soft = (cx, cy, rx, ry) => (typeof CUR !== 'undefined' && CUR.shade === 'soft') ? E(cx, cy, rx, ry, 'url(#ball3d)', 0) : '';
 function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 
@@ -370,7 +370,7 @@ function catEyes(face) {
   if (face === 'plot') s += L('M-27 -22 L-8 -16 M8 -16 L27 -22', 3);
   return s;
 }
-function catHead(face = 'neutral') {
+function catHead(face = 'neutral', phones = false, hat = false) {
   let s = '';
   s += P('M-35 -12 L-32 -54 L-6 -31 Z', C.cat) + Pn('M-29 -19 L-28 -44 L-12 -30 Z', C.earIn);
   s += P('M35 -12 L32 -54 L6 -31 Z', C.cat) + Pn('M29 -19 L28 -44 L12 -30 Z', C.earIn);
@@ -382,7 +382,22 @@ function catHead(face = 'neutral') {
   s += P('M-5 5 L5 5 L0 10.5 Z', '#7d6266', 1.6);
   s += face === 'shock' ? E(0, 19, 4, 5, '#5b2a33', 2) : L('M0 10.5 L0 14 M-7 15 Q-3.5 19.5 0 14 Q3.5 19.5 7 15', 2);
   s += L('M-14 12 L-50 5 M-14 15 L-52 16 M-14 18 L-47 26 M14 12 L50 5 M14 15 L52 16 M14 18 L47 26', 1.4);
+  if (phones) s += L('M-42 -2 C-48 -78 48 -78 42 -2', 11) + L('M-42 -2 C-48 -78 48 -78 42 -2', 6, '#2b2a30')
+    + R(-56, -18, 17, 32, '#2b2a30', 8, 2.5) + R(39, -18, 17, 32, '#2b2a30', 8, 2.5);
+  if (hat) s += plumedHat();
   return s + soft(0, -2, 44, 36);
+}
+/** Cosplay cavalier hat (Puss-in-Boots style), drawn in cat-head coordinates. */
+function plumedHat() {
+  return P('M-30 -40 C-40 -62 -70 -78 -92 -70 C-70 -66 -54 -54 -38 -36 Z', '#e8453c', 2.2) + L('M-36 -40 C-52 -60 -70 -68 -86 -68', 1.4, '#fff3e6')
+    + E(2, -36, 50, 11, '#5a3f8a', 2.6) + P('M-24 -40 C-28 -76 32 -78 28 -40 Z', '#5a3f8a', 2.6)
+    + L('M-25 -46 Q2 -52 28 -46', 6, '#f2c230') + shade('M14 -72 C26 -66 30 -54 28 -40 L18 -40 C20 -52 20 -62 14 -72 Z');
+}
+/** A little cosplay boot with a folded cuff. Origin = sole under the heel; toe points right. */
+function boot(x, y, s = 1, rot = 0) {
+  return G(`translate(${x} ${y}) rotate(${rot}) scale(${s})`,
+    P('M-9 -34 L9 -34 L10 -12 C18 -12 26 -8 26 -2 L26 0 L-10 0 Z', '#8a5530', 2.4)
+    + P('M-13 -42 L13 -42 L11 -30 L-11 -30 Z', '#c48a4e', 2.2) + L('M-10 0 L26 0', 3.5, '#4a2c18'));
 }
 function paw(x, y, r = 11, beans = false, rot = 0) {
   let s = E(x, y, r, r * .78, C.catW, 2.5);
@@ -393,8 +408,8 @@ function paw(x, y, r = 11, beans = false, rot = 0) {
 function ball(x, y, r = 14) {
   return `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.ball}" ${INK} stroke-width="2.5"/>` + E(x - r * .35, y - r * .4, r * .28, r * .18, '#ffb08f', 0);
 }
-/** Tammy. Origin = floor under her. pose: sit | loaf | back | walk. face: neutral|wide|smug|plot|sleep|happy|shock. */
-function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutral', raise = false, ballOnHead = false } = {}) {
+/** Tammy. Origin = floor under her. pose: sit | loaf | back | walk. face: neutral|wide|smug|plot|sleep|happy|shock. phones: wearing Sarah's headphones. */
+function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutral', raise = false, ballOnHead = false, phones = false, hat = false, boots = false } = {}) {
   let g = '';
   const hs = CUR.catHead || CUR.head || 1, bs = CUR.catBody || 1, hsc = hs === 1 ? '' : ` scale(${hs})`;
   if (pose === 'sit') {
@@ -408,7 +423,7 @@ function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutra
     b += L('M-25 -100 Q0 -90 25 -100', 7, C.collar);
     g += G(`scale(1 ${bs})`, b);
     const hy = -100 * bs - 28 * hs;
-    g += G(`translate(0 ${hy}) scale(${hs})`, catHead(face));
+    g += G(`translate(0 ${hy}) scale(${hs})`, catHead(face, phones, hat));
     if (ballOnHead) g += ball(0, hy - 58 * hs, 17);
   }
   if (pose === 'loaf') {
@@ -416,24 +431,24 @@ function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutra
     g += L('M-40 -60 Q-10 -74 26 -66', 2.2, C.catDk);
     g += L('M-70 -24 C-66 6 12 10 44 -2', 19) + L('M-70 -24 C-66 6 12 10 44 -2', 13, C.cat);
     g += paw(26, -8, 15);
-    g += G('translate(40 -46) rotate(14) scale(.8)' + hsc, catHead(face));
+    g += G('translate(40 -46) rotate(14) scale(.8)' + hsc, catHead(face, phones, hat));
   }
   if (pose === 'back') {
     g += L('M56 -26 C92 -20 98 -52 82 -64', 19) + L('M56 -26 C92 -20 98 -52 82 -64', 13, C.cat);
     g += limb([[30, -46], [44, -96]], 18, C.cat) + paw(46, -104, 14, true, 8);
     g += E(5, -32, 64, 31, C.cat);
     g += E(12, -40, 42, 17, C.catW, 0);
-    g += G('translate(-72 -30) rotate(-78)' + hsc, catHead(face));
+    g += G('translate(-72 -30) rotate(-78)' + hsc, catHead(face, phones, hat));
     g += limb([[-24, -50], [-30, -118]], 17, C.catW) + paw(-31, -128, 14, true, -4);
     g += limb([[-6, -52], [2, -114]], 17, C.catW) + paw(3, -124, 14, true, 6);
   }
   if (pose === 'walk') {
     g += L('M-50 -64 C-88 -76 -86 -122 -62 -130', 19) + L('M-50 -64 C-88 -76 -86 -122 -62 -130', 13, C.cat);
-    for (const lx of [-38, -22, 22, 36]) g += limb([[lx, -50], [lx, -8]], 13, C.cat) + paw(lx + 3, -5, 9);
+    for (const lx of [-38, -22, 22, 36]) g += limb([[lx, -50], [lx, -8]], 13, C.cat) + (boots ? boot(lx, -2, .72) : paw(lx + 3, -5, 9));
     g += E(0, -56, 57, 28, C.cat);
     g += E(40, -50, 14, 17, C.catW, 0);
     g += L('M44 -82 Q54 -72 62 -80', 6, C.collar);
-    g += G('translate(58 -96) scale(.86)' + hsc, catHead(face));
+    g += G('translate(58 -96) scale(.86)' + hsc, catHead(face, phones, hat));
   }
   return G(`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`, g);
 }
@@ -526,6 +541,19 @@ const SCENES = {
     s += L('M110 364 L400 364 M95 382 L400 382 M80 400 L400 400 M150 352 L120 420 M210 352 L190 420 M270 352 L260 420 M330 352 L330 420', 4, '#2a2830');
     return s;
   },
+  /* Kitchen: window onto grey suburban houses under a cloudy sky, counter with a pie (holiday season). */
+  kitchen: () => {
+    let s = R(0, 0, 400, 420, '#ebe6dc', 0, 0);
+    s += R(28, 36, 170, 140, '#c9d4e0', 4, 3) + E(70, 70, 40, 14, '#eef2f6', 0) + E(150, 58, 34, 11, '#eef2f6', 0) + E(120, 92, 46, 12, '#dfe6ee', 0);
+    s += P('M32 172 L32 136 L62 116 L92 136 L92 172 Z', '#9ba0a8', 2) + P('M96 172 L96 128 L134 104 L172 128 L172 172 Z', '#8a8f98', 2) + R(150, 140, 14, 16, '#f2e6b8', 1, 1.5) + R(46, 146, 12, 12, '#f2e6b8', 1, 1.5);
+    s += L('M113 36 L113 176 M28 106 L198 106', 4, '#f6f4ef') + R(28, 36, 170, 140, 'none', 4, 3);
+    s += R(236, 18, 170, 112, '#8e9aa6', 4, 3) + L('M320 18 L320 130', 2.5) + L('M308 76 L308 92 M332 76 L332 92', 3);
+    s += R(0, 232, 400, 16, '#dcd6cc', 2, 3) + R(0, 248, 400, 92, '#8e9aa6', 0, 3) + L('M130 248 L130 340 M260 248 L260 340', 2.5) + L('M118 284 L118 304 M142 284 L142 304 M272 284 L272 304', 3);
+    s += E(222, 226, 34, 9, '#e3a35a', 2.5) + P('M188 226 Q222 207 256 226 Z', '#d58a3f', 2.5) + L('M208 218 L216 214 M228 214 L238 218', 2, '#a8662a');
+    s += R(0, 340, 400, 80, '#b9ab98', 0, 0) + L('M0 340 L400 340', 3);
+    for (let i = 0; i < 4; i++) s += L(`M0 ${360 + i * 18} L400 ${360 + i * 18}`, 1.5, 'rgba(0,0,0,.12)');
+    return s;
+  },
   /* Backyard in fall: sky, picket fence, a maple, grass with fallen leaves (n = how many on the ground). */
   yard: (n = 10, seed = 3) => {
     let s = R(0, 0, 400, 420, '#a9d3ee', 0, 0) + E(80, 60, 60, 18, '#e8f3fb', 0) + E(300, 40, 50, 14, '#e8f3fb', 0);
@@ -571,6 +599,26 @@ function scorecard(x, y, text, rot = 0) {
   return G(`rotate(${rot} ${x} ${y})`, R(x - 38, y - 28, 76, 56, '#fff', 5, 2.5) + R(x - 38, y - 28, 76, 12, '#3d5f94', 4, 0)
     + `<text x="${x}" y="${y + 21}" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="34" fill="${C.ink}">${esc(text)}</text>`);
 }
+/** Cardboard-and-felt turkey tail costume: a fan of feathers centred on (cx, cy), radius r, opening upward (rot tilts it). */
+function turkeyFan(cx, cy, r, rot = 0) {
+  const cols = ['#8a4b2a', '#d9452f', '#e8a33a', '#b8542a', '#c8642c', '#f2b134', '#8a4b2a'];
+  let s = '';
+  for (let i = 0; i < 9; i++) {
+    const a = -168 + i * 19.5, col = cols[i % cols.length];
+    s += G(`rotate(${a + 90} 0 0)`, P(`M0 0 C${-r * .2} ${-r * .3} ${-r * .2} ${-r * .85} 0 ${-r} C${r * .2} ${-r * .85} ${r * .2} ${-r * .3} 0 0 Z`, col, 2.2)
+      + L(`M${-r * .14} ${-r * .72} Q0 ${-r * .78} ${r * .14} ${-r * .72}`, 4, '#fff6e0') + E(0, -r * .9, r * .06, r * .07, C.ink, 0)
+      + L(`M0 -6 L0 ${-r * .66}`, 1.4, 'rgba(60,30,20,.45)'));
+  }
+  s += P(`M${-r * .32} 2 C${-r * .32} ${-r * .3} ${r * .32} ${-r * .3} ${r * .32} 2 Z`, '#7a4a2c', 2.4);
+  return G(`translate(${cx} ${cy}) rotate(${rot})`, s);
+}
+/** A rainy window for the den's teal wall (above the mantel). */
+function denWindow() {
+  let s = R(272, 22, 116, 124, '#aeb8c2', 4, 3) + E(310, 50, 30, 10, '#c9d0d8', 0) + E(356, 70, 26, 8, '#c9d0d8', 0);
+  s += P('M276 142 L276 112 L304 94 L332 112 L332 142 Z', '#8d939b', 2) + P('M336 142 L336 104 L362 88 L388 104 L388 142 Z', '#80868f', 2);
+  for (let i = 0; i < 12; i++) s += L(`M${282 + (i * 37) % 100} ${30 + (i * 23) % 90} l-4 12`, 1.6, '#e8eef4');
+  return s + L('M330 22 L330 146 M272 84 L388 84', 4, '#f6f4ef') + R(272, 22, 116, 124, 'none', 4, 3);
+}
 /* Art styles: each strip can carry style: '<key>'. A style re-treats the same drawings
    (filters, texture overlays, lettering) so different looks can be compared. */
 const STYLES = {
@@ -597,7 +645,7 @@ Object.assign(STYLES, {
 });
 const TRYOUT_LOOKS = ['classic', 'webcomic', 'inky', 'chibi', 'greychibi', 'storybook', 'clay', 'simple', 'sheet'];
 let CUR = STYLES.classic;
-function panel(alt, body) {
+function panel(alt, body, over = '') {
   panel.n = (panel.n || 0) + 1; const id = 'cp' + panel.n;
   return `<svg viewBox="0 0 400 420" role="img" aria-label="${esc(alt).replace(/"/g, '&quot;')}"><defs><clipPath id="${id}"><rect x="4" y="4" width="392" height="412" rx="8"/></clipPath></defs>`
     + `<rect x="4" y="4" width="392" height="412" rx="8" fill="#fff"/><g clip-path="url(#${id})"><g${CUR.filter ? ` filter="url(#${CUR.filter})"` : ''}>${body}</g>`
@@ -605,7 +653,7 @@ function panel(alt, body) {
     + (CUR.paper ? `<rect x="0" y="0" width="400" height="420" filter="url(#paper)" opacity="${CUR.paper}" style="mix-blend-mode:multiply"/>` : '')
     + (CUR.dots ? `<rect x="0" y="0" width="400" height="420" fill="url(#halftone)" opacity="${CUR.dots}"/>` : '')
     + (CUR.bigDots ? `<rect x="0" y="0" width="400" height="420" fill="url(#halftone-big)" opacity="${CUR.bigDots}" style="mix-blend-mode:multiply"/>` : '')
-    + `</g>`
+    + over + `</g>`
     + `<rect x="4" y="4" width="392" height="412" rx="8" fill="none" stroke="${C.ink}" stroke-width="5"/></svg>`;
 }
 const motion = (pts, w = 3) => pts.map(([x1, y1, x2, y2]) => L(`M${x1} ${y1} L${x2} ${y2}`, w)).join('');
@@ -764,6 +812,197 @@ const STRIPS = [
           s += sarah({ x: 92, y: 405, s: .9, arms: ['hip', 'star'], face: 'deadpan', look: 4 }) + scorecard(196, 168, '9.4', 6);
           s += say(140, 14, 252, 'Nine point four. You under-rotated on the dismount.', [70, 152]);
           s += say(322, 166, 136, 'Re-rake it. I’m going again.', [300, 262], { thought: true, fs: 18 });
+          return s;
+        })())
+    ]
+  },
+  {
+    no: 5, date: '2026-11-22', title: 'Pending Review', tag: 'Together', style: 'inky',
+    panels: [
+      () => panel('Thanksgiving week in the kitchen. Sarah, in her hoodie and cargo pants with headphones on, writes in a notebook with a pen. A pie cools on the counter. Tammy sits nearby, watching. Caption: Thanksgiving week. Sarah: The annual gratitude list. Ranked, obviously.',
+        SCENES.kitchen() + sarah({ x: 118, y: 405, s: .95, arms: ['hold', 'write'], hold: 'notebook', face: 'thinking', outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true })
+        + tammy({ x: 306, y: 398, s: .9, face: 'neutral' })
+        + caption(14, 14, 192, 'Thanksgiving week.')
+        + say(250, 62, 270, 'The annual gratitude list. Ranked, obviously.', [140, 150])),
+      () => panel('Close-up of Sarah’s notebook page in ink. It reads: Things I’m Thankful For (ranked). 1. Headphones. 2. Practice got cancelled. 3. Tammy, with an asterisk. Footnote: pending review of the Shelf Incident. Tammy’s head pops up at the bottom edge, eyes shocked. Tammy thinks: PENDING?!',
+        (() => {
+          let s = R(0, 0, 400, 420, '#b98c5e', 0, 0) + L('M0 120 Q200 108 400 124 M0 260 Q200 250 400 268 M0 380 Q200 372 400 388', 2, 'rgba(70,40,20,.3)');
+          let pg = R(34, 30, 336, 300, '#fffdf6', 4, 3);
+          for (let i = 0; i < 10; i++) pg += L(`M38 ${86 + i * 24} L366 ${86 + i * 24}`, 1.4, '#a9c1e2');
+          pg += L('M76 34 L76 326', 1.6, '#e48a8a');
+          const tx = (x, y, str, fs = 23, extra = '') => `<text x="${x}" y="${y}" font-family="${CUR.font}" font-size="${fs}" fill="#1f2a55" ${extra}>${esc(str)}</text>`;
+          pg += tx(86, 76, 'Things I’m Thankful For', 26) + L('M86 82 L340 80', 2, '#1f2a55') + tx(288, 104, '(ranked)', 17);
+          pg += tx(86, 130, '1. Headphones') + tx(86, 154, '2. Practice got cancelled') + tx(86, 178, '3. Tammy*');
+          pg += tx(86, 226, '*pending review of', 18) + tx(86, 248, 'the Shelf Incident', 18) + L('M84 252 L232 250', 1.6, '#1f2a55');
+          s += G('rotate(-3 200 180)', pg);
+          s += G('rotate(28 330 300)', R(250, 294, 120, 12, '#2b2a30', 6, 2) + P('M370 294 L392 300 L370 306 Z', '#c9c4b8', 2));
+          s += G('translate(118 420) scale(1.25)', catHead('shock'));
+          s += say(272, 300, 150, 'PENDING?!', [170, 352], { thought: true, fs: 22 });
+          return s;
+        })()),
+      () => panel('Late at night in the dark den. Tammy sits beside a sheet of paper on the floor, a pen at her paws, with inky paw prints all over the page. Caption: 11:58 PM. A rebuttal. The paper reads: Tammy’s List. 1. Red dot. 2. Garage shelf. 3. Blue chair. 4. Orange balls (31). 5. Sarah.',
+        (() => {
+          let s = SCENES.den() + R(0, 0, 400, 420, '#1b2346', 0, 0, 'opacity=".5"') + `<circle cx="300" cy="300" r="150" fill="url(#glow)" opacity=".55"/>`;
+          s += tammy({ x: 96, y: 404, s: .86, face: 'plot' });
+          s += G('rotate(-12 130 396)', R(100, 390, 62, 10, '#2b2a30', 5, 2) + P('M162 390 L178 395 L162 400 Z', '#c9c4b8', 1.6)) + E(152, 408, 5, 4, C.ink, 0, 'opacity=".5"');
+          let pg = R(176, 168, 206, 232, '#fffdf6', 4, 3);
+          const tx = (y, str, fs = 22) => `<text x="192" y="${y}" font-family="${CUR.font}" font-size="${fs}" fill="${C.ink}">${esc(str)}</text>`;
+          pg += tx(204, 'TAMMY’S LIST', 25) + L('M190 212 L340 210', 2.5) + tx(244, '1. RED DOT') + tx(274, '2. Garage shelf') + tx(304, '3. Blue chair') + tx(334, '4. Orange balls (31)') + tx(370, '5. Sarah', 20);
+          for (const [px, py, r] of [[350, 232, 0], [300, 380, 20], [360, 356, -15]]) pg += G(`rotate(${r} ${px} ${py})`, E(px, py, 6, 5, C.ink, 0, 'opacity=".55"') + [[-6, -7], [-1, -10], [5, -7]].map(([dx, dy]) => `<circle cx="${px + dx}" cy="${py + dy}" r="2.2" fill="${C.ink}" opacity=".55"/>`).join(''));
+          s += G('rotate(4 280 284)', pg);
+          s += caption(14, 14, 200, '11:58 PM. A rebuttal.');
+          return s;
+        })()),
+      () => panel('Morning in the den. Sarah stands holding Tammy’s list, staring at it deadpan. Tammy lounges smugly on the couch. Sarah: Fifth. Behind a SHELF. Tammy thinks: Pending review.',
+        SCENES.den() + couch(170, 404, 214)
+        + tammy({ x: 278, y: 312, s: .78, pose: 'loaf', face: 'smug' })
+        + sarah({ x: 92, y: 405, s: .95, arms: ['hold', 'hold'], face: 'deadpan', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false })
+        + G('translate(92 405) scale(.95) translate(0 -112) rotate(-6)', R(-30, -26, 60, 52, '#fffdf6', 3, 2.5) + L('M-22 -14 L18 -14 M-22 -4 L14 -4 M-22 6 L20 6 M-22 16 L8 16', 1.8, C.ink) + E(14, 16, 4, 3, C.ink, 0, 'opacity=".5"'))
+        + say(168, 22, 250, 'Fifth. Behind a SHELF.', [104, 146])
+        + say(306, 150, 150, 'Pending review.', [318, 244], { thought: true, fs: 20 }))
+    ]
+  },
+  {
+    no: 6, date: '2026-11-23', title: 'Exit, Stage Left', tag: 'Together', style: 'chibi',
+    panels: [
+      () => panel('Thanksgiving week in the den. Sarah, in her hoodie, cargo pants and headphones, holds up a homemade cardboard turkey-feather tail costume. Tammy sits nearby looking shocked. Caption: The drama club needs a turkey for the Thanksgiving pageant. Sarah: Congratulations. You got the part.',
+        SCENES.den()
+        + sarah({ x: 112, y: 405, s: .95, arms: ['down', 'point'], face: 'smirk', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true })
+        + turkeyFan(226, 344, 62, 8)
+        + tammy({ x: 320, y: 400, s: .92, face: 'shock' })
+        + caption(14, 14, 230, 'The drama club needs a turkey for the Thanksgiving pageant.', 16)
+        + say(290, 104, 190, 'Congratulations. You got the part.', [146, 196])),
+      () => panel('Tammy sits grumpily wearing the turkey tail costume, a big fan of feathers behind her. Sarah, holding a script, stands at the left. Sarah: Script says the turkey struts proudly across the stage. Places, please! Tammy thinks: Cats do not strut on command.',
+        SCENES.den()
+        + turkeyFan(262, 330, 120, 0)
+        + tammy({ x: 262, y: 404, s: 1.05, face: 'plot' })
+        + sarah({ x: 74, y: 408, s: .8, arms: ['hold', 'write'], hold: 'notebook', face: 'neutral', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false })
+        + say(130, 16, 236, 'Script says the turkey struts proudly across the stage. Places!', [82, 178], { fs: 18 })
+        + say(296, 120, 168, 'Cats do not strut on command.', [262, 214], { thought: true, fs: 18 })),
+      () => panel('Sarah aims the laser pointer; its red dot zips across the rug and Tammy races after it at full speed, turkey feathers streaming. Caption: Motivation: provided. Sarah: Strut... strut... now EXIT, STAGE LEFT! Sound effect: ZOOM!',
+        (() => {
+          let s = SCENES.den();
+          s += turkeyFan(220, 330, 80, -62);
+          s += sarah({ x: 66, y: 408, s: .82, arms: ['down', 'point'], hold: 'laser', face: 'determined', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false });
+          s += tammy({ x: 270, y: 404, s: .82, pose: 'walk', face: 'wide' });
+          s += `<circle cx="376" cy="376" r="22" fill="#ff2d4a" opacity=".14"/>` + laserDot(376, 376);
+          s += motion([[150, 300, 120, 292], [150, 330, 116, 330], [156, 360, 124, 368]], 3);
+          s += caption(14, 14, 200, 'Motivation: provided.');
+          s += say(262, 66, 250, 'Strut... strut... now EXIT, STAGE LEFT!', [96, 178]);
+          s += sfx(300, 196, 'ZOOM!', { size: 50, rot: -6 });
+          return s;
+        })()),
+      () => panel('In the garage, Tammy lounges on the forbidden top shelf, still wearing her turkey feathers. Sarah stands below, looking up deadpan. Sarah: That is a wrap. You can come down now. Tammy thinks: Sorry. This turkey has been pardoned. Caption: Signed: the turkey.',
+        (() => {
+          let s = SCENES.garage();
+          s += R(176, 70, 80, 60, '#c79a5b', 3) + L('M176 92 L256 92', 2.5) + R(262, 96, 50, 34, '#d6b583', 3);
+          s += R(150, 130, 260, 14, '#9ea3aa', 2) + L('M170 144 L170 420 M392 144 L392 420', 6, '#8a8f98');
+          s += R(150, 270, 260, 12, '#9ea3aa', 2) + R(190, 230, 70, 40, '#2a8f99', 5) + R(280, 240, 60, 30, '#c79a5b', 3);
+          s += R(0, 380, 400, 40, '#2a2a30', 0, 0);
+          s += turkeyFan(318, 108, 78, -8);
+          s += tammy({ x: 342, y: 132, s: .62, pose: 'loaf', face: 'smug' });
+          s += sarah({ x: 86, y: 410, s: .86, arms: 'hip', face: 'deadpan', look: 6, outfit: 'cargo', hair: 'shoulder', glasses: false });
+          s += say(96, 14, 170, 'That’s a wrap. You can come down now.', [94, 196], { fs: 18 });
+          s += say(290, 156, 200, 'Sorry. This turkey has been pardoned.', [350, 116], { thought: true, fs: 18 });
+          s += caption(196, 360, 190, 'Signed: the turkey.', 17);
+          return s;
+        })())
+    ]
+  },
+  {
+    no: 7, date: '2026-11-24', title: 'The Grey Era', tag: 'Together', style: 'greychibi',
+    panels: [
+      () => panel('A rainy grey day in the den; rain streaks the window. Sarah, in her hoodie, cargo pants and headphones, stands with a deadpan look. Tammy sits by the fireplace. Caption: Thanksgiving break. Rain. Sarah: I have entered my grey era. Moody music. No color. No feelings. Tammy thinks: Grey? I invented grey.',
+        (() => {
+          let s = SCENES.den() + denWindow();
+          s += sarah({ x: 108, y: 405, s: .95, arms: 'down', face: 'deadpan', look: 3, outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true });
+          s += L('M44 136 q-6 -8 0 -16 q6 -8 0 -16 M172 128 q6 -8 0 -16 q-6 -8 0 -16', 2.5, '#8a8a8a');
+          s += tammy({ x: 316, y: 398, s: .9, face: 'smug' });
+          s += caption(14, 14, 236, 'Thanksgiving break. Rain.', 16);
+          s += say(132, 58, 240, 'I have entered my grey era. Moody music. No color. No feelings.', [112, 168], { fs: 18 });
+          s += say(312, 160, 150, 'Grey? I invented grey.', [318, 258], { thought: true, fs: 17 });
+          return s;
+        })()),
+      () => panel('Tammy sits up proudly with an orange ball balanced on her head, beaming like a showgirl. Sarah watches, unmoved. Caption: Cheer-up attempt number 3. Sound effect: TA-DA! Sarah: Adorable. Still grey.',
+        (() => {
+          let s = SCENES.den();
+          s += sarah({ x: 92, y: 405, s: .9, arms: ['down', 'hip'], face: 'deadpan', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true });
+          s += tammy({ x: 276, y: 398, s: 1.02, face: 'happy', ballOnHead: true });
+          s += motion([[214, 196, 196, 186], [212, 222, 192, 222], [338, 196, 356, 186], [340, 222, 360, 222]], 3);
+          s += caption(14, 14, 220, 'Cheer-up attempt #3.');
+          s += say(118, 60, 196, 'Adorable. Still grey.', [96, 178]);
+          s += sfx(312, 92, 'TA-DA!', { size: 40, rot: 8 });
+          return s;
+        })()),
+      () => panel('Sarah, smiling a little, clicks the laser pointer. Its red dot is the only color in the whole grey world, glowing on the rainy window above the mantel, and Tammy launches up the wall after it. Caption: Attempt number 5: Sarah cracks. Sarah: Fine. ONE color. Sound effect: SKRRT!',
+        (() => {
+          let s = SCENES.den() + denWindow();
+          s += sarah({ x: 78, y: 405, s: .9, arms: ['down', 'point'], hold: 'laser', face: 'smile', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true });
+          s += G('rotate(-38 282 300)', tammy({ x: 282, y: 330, s: .86, pose: 'walk', face: 'wide' }));
+          s += motion([[196, 360, 170, 380], [214, 378, 192, 404], [178, 336, 150, 350]], 3);
+          s += caption(14, 14, 236, 'Attempt #5: Sarah cracks.', 16);
+          s += say(116, 58, 190, 'Fine. ONE color.', [84, 186]);
+          s += sfx(250, 404, 'SKRRT!', { size: 38, rot: -4 });
+          return s;
+        })(),
+        `<circle cx="352" cy="132" r="30" fill="#ff2d4a" opacity=".12"/>` + laserDot(352, 132)),
+      () => panel('Twenty minutes later. Sarah, headphones gone, holds the dead laser pointer. Tammy lies in a moody loaf on the couch wearing Sarah’s big headphones, eyes half-closed. Sarah: Battery’s dead. Also, those are MINE. Tammy thinks: Leave me alone. I’m in my grey era.',
+        (() => {
+          let s = SCENES.den() + denWindow() + couch(176, 404, 210);
+          s += tammy({ x: 286, y: 312, s: .8, pose: 'loaf', face: 'smug', phones: true });
+          s += sarah({ x: 86, y: 405, s: .9, arms: ['down', 'hold'], hold: 'laser', face: 'skeptical', look: 5, outfit: 'cargo', hair: 'shoulder', glasses: false });
+          s += caption(14, 14, 200, 'Twenty minutes later.');
+          s += say(124, 58, 220, 'Battery’s dead. Also, those are MINE.', [92, 192], { fs: 18 });
+          s += say(292, 140, 186, 'Leave me alone. I’m in my grey era.', [300, 226], { thought: true, fs: 18 });
+          return s;
+        })())
+    ]
+  },
+  {
+    no: 8, date: '2026-11-25', title: 'Puss in Socks', tag: 'Together', style: 'storybook',
+    panels: [
+      () => panel('Storybook-style den scene. Sarah, in her hoodie, cargo pants and headphones, proudly holds up a tiny purple cavalier hat with a red feather; four little brown cosplay boots sit on the rug, next to a spool of thread. Tammy sits by the fireplace, eyes wide. Caption: Once upon a time, a girl sewed costumes for the Winter Cosplay Con. Sarah: Tammy, you will be Puss in Boots. A storybook classic.',
+        (() => {
+          let s = SCENES.den();
+          s += boot(176, 396, .9) + boot(206, 400, .9, 6) + boot(150, 410, .9, -8) + boot(232, 412, .9, 12);
+          s += R(56, 394, 22, 18, '#e8453c', 3, 2) + L('M58 400 L76 400 M58 406 L76 406', 1.4, '#fff3e6');
+          s += sarah({ x: 104, y: 405, s: .9, arms: ['down', 'point'], face: 'smile', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true });
+          s += G('translate(210 220) scale(.8) rotate(-8)', plumedHat());
+          s += tammy({ x: 320, y: 398, s: .92, face: 'wide' });
+          s += caption(14, 14, 372, 'Once upon a time, a girl sewed costumes for the Winter Cosplay Con.', 16);
+          s += say(250, 70, 236, 'Tammy, you’ll be Puss in Boots. A storybook classic.', [140, 150], { fs: 18 });
+          return s;
+        })()),
+      () => panel('Tammy sits regally, wearing the feathered hat at a jaunty angle and looking smug. Sarah kneels nearby offering a single tiny boot. Sarah: Hat: accepted. Now, just ONE boot. Tammy thinks: Hat: fine. Boots: absolutely not.',
+        (() => {
+          let s = SCENES.den();
+          s += tammy({ x: 286, y: 402, s: 1.05, face: 'smug', hat: true });
+          s += sarah({ x: 84, y: 408, s: .82, arms: ['down', 'point'], face: 'neutral', look: 5, outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true });
+          s += boot(156, 266, .95, -10);
+          s += say(112, 16, 204, 'Hat: accepted. Now, just ONE boot.', [96, 150], { fs: 18 });
+          s += say(296, 30, 170, 'Hat: fine. Boots: absolutely not.', [300, 168], { thought: true, fs: 18 });
+          return s;
+        })()),
+      () => panel('Somehow Tammy is now wearing all four boots and the hat. She walks stiffly backward across the rug, legs high, away from Sarah, who watches from the right in surprise. Caption: The cat took her first step... backward. Sound effect: CLOMP. CLOMP. Sarah: That is the wrong direction.',
+        (() => {
+          let s = SCENES.den();
+          s += tammy({ x: 158, y: 396, s: .95, pose: 'walk', face: 'shock', hat: true, boots: true });
+          s += motion([[236, 318, 262, 318], [240, 340, 270, 342], [232, 362, 258, 368]], 3);
+          s += sarah({ x: 326, y: 408, s: .84, arms: ['shrug', 'down'], face: 'surprised', outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true });
+          s += caption(14, 14, 214, 'The cat took her first step... backward.', 16);
+          s += say(304, 76, 176, 'That is the wrong direction.', [318, 160], { fs: 18 });
+          s += sfx(104, 238, 'CLOMP.', { size: 32, rot: -10, fill: '#c48a4e' }) + sfx(70, 290, 'CLOMP.', { size: 26, rot: -16, fill: '#c48a4e' });
+          return s;
+        })()),
+      () => panel('The boots lie kicked across the rug. Tammy flops on her back in the hat, four white-socked paws in the air, delighted. Sarah, deadpan, crosses something out in her notebook. Sarah: Fine. Puss in SOCKS. Very avant-garde. Tammy thinks: I have been in costume since birth. Caption: The End.',
+        (() => {
+          let s = SCENES.den();
+          s += boot(250, 414, .85, -70) + boot(376, 352, .85, 100) + boot(214, 362, .85, 30) + boot(372, 412, .85, -150);
+          s += tammy({ x: 296, y: 368, s: .86, pose: 'back', face: 'happy', hat: true });
+          s += sarah({ x: 88, y: 405, s: .88, arms: ['hold', 'write'], hold: 'notebook', face: 'deadpan', look: 4, outfit: 'cargo', hair: 'shoulder', glasses: false, headphones: true });
+          s += say(126, 14, 228, 'Fine. Puss in SOCKS. Very avant-garde.', [100, 148], { fs: 18 });
+          s += say(300, 96, 164, 'I’ve been in costume since birth.', [272, 204], { thought: true, fs: 18 });
+          s += caption(150, 380, 80, 'The End.', 16);
           return s;
         })())
     ]
