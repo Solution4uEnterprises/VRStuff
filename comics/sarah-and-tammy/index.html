@@ -96,7 +96,7 @@ footer { margin-top: 40px; color: var(--muted); font-family: var(--hand); font-s
       </div></div>
       <div class="who"><div id="cast-tammy"></div><div>
         <h3>Tammy</h3><p class="role">cat · slightly mischievous (allegedly)</p>
-        <p>Grey coat, white socks, a tiny white mustache. Sleeps wherever she is told not to, balances things on her head when it suits her, and keeps a private collection under the couch.</p>
+        <p>Grey coat, white bib and socks, a tiny white mustache, amber eyes, and a tracker on her collar (it has not helped). Stretches to twice her length on the window perch, supervises every furniture build from underneath it, and keeps a private collection under the couch.</p>
       </div></div>
     </div>
   </section>
@@ -201,7 +201,7 @@ const C = {
   cardigan: '#1f1e27', warmer: '#8e899b', pants: '#4d3576', shoe: '#1d1b22',
   hoodie: '#7a1f33', hoodieDk: '#5e1626', flares: '#6e1a2e', khaki: '#d3c6a6', sneaker: '#cc2b2b', sock: '#f1edf4',
   cat: '#636b78', catDk: '#4f5662', catW: '#f6f4ef', earIn: '#c9a1a5', bean: '#55474c', beanPink: '#e9a29d',
-  catEye: '#d9d35a', collar: '#141418', ball: '#ef5a33', white: '#ffffff', cap: '#fff2a6'
+  catEye: '#e0ac3a', collar: '#141418', ball: '#ef5a33', white: '#ffffff', cap: '#fff2a6'
 };
 const INK = `stroke="${C.ink}" stroke-linejoin="round" stroke-linecap="round"`;
 const LW = () => (typeof CUR !== 'undefined' && CUR.lw) || 1;
@@ -281,7 +281,7 @@ function sarahBrows(f) {
   }[b];
   return L(d, 3);
 }
-/** Sarah. Origin = between her feet. opts: arms ('down' | [left,right]), face, flip, legs ('stand'|'star'|'walk'), hold ('ball'|'notebook'|'laser'), backpack,
+/** Sarah. Origin = between her feet. opts: arms ('down' | [left,right]), face, flip, legs ('stand'|'star'|'walk'), hold ('ball'|'notebook'|'laser'|'basket'|'eggs': wire egg basket in right hand), backpack,
  *  outfit: 'daisy' (tie-dye tee + daisy cardigan + purple pants) | 'hoodie' (maroon "Sorry I'm late" hoodie + maroon flares + red sneakers)
  *          | 'cargo' (same hoodie + khaki cargo pants + socks, for indoors)
  *  hair: 'long' | 'shoulder' (her current cut), glasses: true/false, headphones: true/false */
@@ -325,6 +325,7 @@ function sarah({ x = 0, y = 0, s = 1, flip = false, arms = 'down', face = 'neutr
   if (backpack) b += L('M-26 -156 L-22 -72 M26 -156 L22 -72', 6, '#2c4f66');
   b += sarahArm(-1, la, sleeve) + sarahArm(1, ra, sleeve);
   if (hold === 'ball') b += ball(0, -122, 15);
+  if (hold === 'basket' || hold === 'eggs') { const hp = ARMS[ra] || ARMS.down; b += eggBasket(hp.h[0], hp.h[1] + 4, hold === 'eggs' ? 4 : 0); }
   if (hold === 'laser') { const hp = ARMS[ra] || ARMS.down; b += G(`translate(${hp.h[0]} ${hp.h[1]}) rotate(${ra === 'point' ? 0 : 60})`, R(-2, -4, 22, 7, '#2b2a30', 3, 1.5) + `<circle cx="21" cy="-0.5" r="2" fill="#ff2d4a"/>`); }
   if (hold === 'notebook') b += G('rotate(-8 0 -120)', R(-34, -142, 50, 36, '#fff', 3, 2.5) + L('M-28 -132 L8 -132 M-28 -124 L10 -124 M-28 -116 L4 -116', 1.6, '#9db4d8'))
     + L('M26 -122 L40 -146', 4, '#f2c230') + L('M26 -122 L29 -127', 4, C.ink);
@@ -408,7 +409,7 @@ function paw(x, y, r = 11, beans = false, rot = 0) {
 function ball(x, y, r = 14) {
   return `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.ball}" ${INK} stroke-width="2.5"/>` + E(x - r * .35, y - r * .4, r * .28, r * .18, '#ffb08f', 0);
 }
-/** Tammy. Origin = floor under her. pose: sit | loaf | back | walk. face: neutral|wide|smug|plot|sleep|happy|shock. phones: wearing Sarah's headphones. */
+/** Tammy. Origin = floor under her. pose: sit | loaf | back | walk | noodle (stretched flat, ~280 wide). face: neutral|wide|smug|plot|sleep|happy|shock. phones: wearing Sarah's headphones. */
 function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutral', raise = false, ballOnHead = false, phones = false, hat = false, boots = false } = {}) {
   let g = '';
   const hs = CUR.catHead || CUR.head || 1, bs = CUR.catBody || 1, hsc = hs === 1 ? '' : ` scale(${hs})`;
@@ -420,7 +421,7 @@ function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutra
     b += L('M-14 -60 L-14 -8 M14 -60 L14 -8', 2.2, '#cfcac2');
     b += paw(-15, -6, 12) + (raise ? '' : paw(15, -6, 12)) + soft(0, -50, 46, 52);
     if (raise) b += limb([[16, -70], [34, -120], [42, -160]], 18, C.catW) + paw(42, -168, 15, true, 10);
-    b += L('M-25 -100 Q0 -90 25 -100', 7, C.collar);
+    b += L('M-25 -100 Q0 -90 25 -100', 7, C.collar) + collarTag(0, -90);
     g += G(`scale(1 ${bs})`, b);
     const hy = -100 * bs - 28 * hs;
     g += G(`translate(0 ${hy}) scale(${hs})`, catHead(face, phones, hat));
@@ -447,10 +448,23 @@ function tammy({ x = 0, y = 0, s = 1, flip = false, pose = 'sit', face = 'neutra
     for (const lx of [-38, -22, 22, 36]) g += limb([[lx, -50], [lx, -8]], 13, C.cat) + (boots ? boot(lx, -2, .72) : paw(lx + 3, -5, 9));
     g += E(0, -56, 57, 28, C.cat);
     g += E(40, -50, 14, 17, C.catW, 0);
-    g += L('M44 -82 Q54 -72 62 -80', 6, C.collar);
+    g += L('M44 -82 Q54 -72 62 -80', 6, C.collar) + collarTag(54, -72, .75);
     g += G('translate(58 -96) scale(.86)' + hsc, catHead(face, phones, hat));
   }
+  if (pose === 'noodle') { // stretched out flat on her belly, head left, back legs straight out behind (the window-perch sunbathe)
+    g += L('M120 -26 C150 -30 168 -22 178 -10', 17) + L('M120 -26 C150 -30 168 -22 178 -10', 11, C.cat);
+    g += limb([[96, -18], [150, -14], [186, -18]], 14, C.cat) + paw(196, -18, 11, true, -90);
+    g += P('M-60 -30 C-60 -58 -20 -60 40 -56 C90 -54 126 -48 126 -26 C126 -8 90 -4 40 -6 C-20 -8 -60 -8 -60 -30 Z', C.cat);
+    g += shade('M-50 -14 C-10 -6 80 -4 120 -16 C110 -8 60 -2 0 -6 C-30 -8 -46 -10 -50 -14 Z');
+    g += L('M-20 -50 Q40 -60 100 -48', 2, C.catDk) + soft(30, -32, 90, 28);
+    g += G('translate(-82 -40) rotate(-6) scale(.86)' + hsc, catHead(face, phones, hat));
+    g += paw(-74, -6, 11);
+  }
   return G(`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`, g);
+}
+/** Her collar's black tracker holder (the little oval badge under her chin). */
+function collarTag(x, y, sc = 1) {
+  return G(`translate(${x} ${y}) scale(${sc})`, R(-11, -8, 22, 16, '#141418', 5, 2) + E(0, 0, 6.5, 5, '#2c2c33', 0) + L('M-11 -2 L11 -2', 2.4, '#2c2c33'));
 }
 
 /* ---------------- PROPS & SCENES ---------------- */
@@ -554,6 +568,22 @@ const SCENES = {
     for (let i = 0; i < 4; i++) s += L(`M0 ${360 + i * 18} L400 ${360 + i * 18}`, 1.5, 'rgba(0,0,0,.12)');
     return s;
   },
+  /* The neighbors' chicken yard: big cloudy sky, grey house behind, wire-mesh run, straw ground. Add coop() and chicken()s on top. */
+  coopyard: () => {
+    let s = R(0, 0, 400, 420, '#a9c8e6', 0, 0) + E(90, 50, 80, 22, '#eef2f6', 0) + E(300, 70, 90, 26, '#e2e8ef', 0) + E(220, 30, 50, 14, '#f4f6f8', 0);
+    s += P('M180 220 L180 150 L260 96 L340 150 L340 220 Z', '#8d939b', 2.4) + P('M168 154 L260 90 L352 154', 'none', 4) + R(280, 160, 30, 28, '#e8e2c8', 2, 2) + R(200, 168, 50, 52, '#c9cdd2', 2, 2);
+    s += R(0, 220, 400, 200, '#c7b27a', 0, 0) + L('M0 220 L400 220', 3);
+    const r = rng(12); for (let i = 0; i < 40; i++) { const x = r() * 400, y = 236 + r() * 180; s += L(`M${x.toFixed(0)} ${y.toFixed(0)} l${(r() * 14 - 7).toFixed(1)} -4`, 1.6, '#a68f55'); }
+    s += `<g opacity=".55">${Array.from({ length: 21 }, (_, i) => L(`M${i * 20} 190 L${i * 20} 260`, 1.2, '#5c5c5c')).join('')}${L('M0 200 L400 200 M0 225 L400 225 M0 250 L400 250', 1.2, '#5c5c5c')}</g>` + L('M0 190 L400 190', 3, '#7a6a52');
+    return s;
+  },
+  /* A carpeted bedroom mid-build: grey carpet, plain wall, assembly instructions on the floor. */
+  bedroom: () => {
+    let s = R(0, 0, 400, 420, '#e4e2e6', 0, 0) + R(0, 250, 400, 170, '#a9a6ab', 0, 0) + L('M0 250 L400 250', 3);
+    const r = rng(5); for (let i = 0; i < 60; i++) s += `<circle cx="${(r() * 400).toFixed(0)}" cy="${(256 + r() * 160).toFixed(0)}" r="1.2" fill="#8e8b91"/>`;
+    s += G('rotate(-8 60 300)', R(24, 280, 70, 50, '#fbfaf6', 2, 2) + L('M32 292 L84 292 M32 302 L78 302 M32 312 L70 312', 1.4, '#7a7a80'));
+    return s;
+  },
   /* Backyard in fall: sky, picket fence, a maple, grass with fallen leaves (n = how many on the ground). */
   yard: (n = 10, seed = 3) => {
     let s = R(0, 0, 400, 420, '#a9d3ee', 0, 0) + E(80, 60, 60, 18, '#e8f3fb', 0) + E(300, 40, 50, 14, '#e8f3fb', 0);
@@ -574,6 +604,56 @@ function couch(x, y, w = 260) {
     + R(x + 8, y - 92, w - 16, 40, '#c2b29b', 14) + L(`M${x + w / 2} ${y - 90} L${x + w / 2} ${y - 54}`, 2)
     + R(x - 18, y - 104, 40, 92, '#2a2426', 14) + R(x - 16, y - 110, 38, 22, '#b3a38d', 10)
     + R(x + w - 22, y - 104, 40, 92, '#2a2426', 14) + R(x + w - 22, y - 110, 38, 22, '#b3a38d', 10);
+}
+/** Window perch: wooden shelf with a fluffy white bolster ring. Left end at x, shelf top at y, width w. Put tammy({pose:'noodle'}) at about (x + w*.45, y - 6). */
+function windowPerch(x, y, w = 300) {
+  let s = P(`M${x + 20} ${y + 12} L${x + 50} ${y + 12} L${x + 44} ${y + 70} Z M${x + w - 50} ${y + 12} L${x + w - 20} ${y + 12} L${x + w - 44} ${y + 70} Z`, '#d9bf94', 2.4);
+  s += R(x, y, w, 14, '#e6cfa6', 4, 2.6);
+  for (let i = 0; i < Math.round(w / 22); i++) s += E(x + 12 + i * 22, y - 4, 13, 15, '#fbf8f1', 2);
+  return s;
+}
+/** Black wire egg basket (Sarah's, from the chicken-sitting job). Handle top at (x, y); eggs = how many show. */
+function eggBasket(x, y, eggs = 0) {
+  let s = L(`M${x - 22} ${y + 26} C${x - 22} ${y - 6} ${x + 22} ${y - 6} ${x + 22} ${y + 26}`, 2.4);
+  const r = rng(eggs + 3);
+  for (let i = 0; i < eggs; i++) s += E(x - 14 + i * 9, y + 22 - (i % 2) * 5, 6, 7.5, ['#f3e7d3', '#d9a777', '#fbf6ee', '#c98e5c'][i % 4], 1.6);
+  s += P(`M${x - 24} ${y + 24} L${x + 24} ${y + 24} L${x + 18} ${y + 50} L${x - 18} ${y + 50} Z`, 'rgba(30,30,34,.08)', 2.4);
+  s += L(Array.from({ length: 6 }, (_, i) => `M${x - 21 + i * 8.4} ${y + 24} L${x - 16 + i * 6.4} ${y + 50}`).join(' ') + ` M${x - 22} ${y + 36} L${x + 22} ${y + 36}`, 1.6);
+  return s;
+}
+const egg = (x, y, col = '#f3e7d3', rot = 0) => G(`rotate(${rot} ${x} ${y})`, E(x, y, 7, 9, col, 1.8) + E(x - 2, y - 3, 2, 3, '#fff', 0, 'opacity=".6"'));
+/** A backyard hen. Origin = feet; faces right (flip to face left). col: 'red' (brown-red), 'white', 'black', 'buff'. mood: 'calm' | 'mad' | 'shock'. */
+function chicken({ x = 0, y = 0, s = 1, flip = false, col = 'red', mood = 'calm', peck = false } = {}) {
+  const body = { red: '#a5532e', white: '#f4efe6', black: '#2e2b33', buff: '#d9a65f' }[col] || col, dk = { red: '#7e3a1f', white: '#d9d2c4', black: '#1a181e', buff: '#b5843f' }[col] || '#555';
+  let g = L('M-6 -22 L-8 -2 M-8 -2 l-6 2 M-8 -2 l4 2 M8 -22 L8 -2 M8 -2 l-6 2 M8 -2 l6 2', 3, '#e0a43a');
+  g += P('M-40 -46 C-54 -60 -52 -84 -36 -80 C-30 -66 -24 -60 -14 -60 C0 -66 30 -64 38 -46 C44 -30 30 -18 4 -18 C-24 -18 -40 -28 -40 -46 Z', body, 2.6);
+  g += P('M-10 -48 C0 -58 22 -54 22 -40 C12 -38 0 -40 -10 -48 Z', dk, 2) + shade('M-36 -30 C-20 -18 20 -16 36 -30 C30 -18 10 -16 -4 -16 C-20 -16 -32 -22 -36 -30 Z');
+  const hd = G(peck ? 'rotate(62 26 -60)' : '', E(36, -74, 17, 18, body, 2.6) + P('M28 -90 C28 -100 34 -100 36 -94 C38 -102 44 -102 44 -94 C48 -98 52 -94 48 -86 Z', '#d63b3b', 2)
+    + P('M51 -76 L64 -71 L51 -66 Z', '#f0b13c', 2) + P('M48 -64 C50 -56 44 -54 44 -60 Z', '#d63b3b', 1.6)
+    + (mood === 'shock' ? E(42, -77, 4, 4.5, '#fff', 1.6) + E(42, -77, 1.6, 1.8, C.ink, 0) : E(42, -77, 2.4, 2.6, C.ink, 0))
+    + (mood === 'mad' ? L('M36 -84 L48 -81', 2.6) : ''));
+  g += hd;
+  return G(`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`, g);
+}
+/** Neighbor's coop: little red henhouse on legs with a ramp and nesting box. Left edge at x, ground at y. */
+function coop(x, y, s = 1) {
+  let g = L('M10 0 L10 -40 M150 0 L150 -40', 6, '#6b4a2f') + P('M0 -40 L160 -40 L160 -130 L0 -130 Z', '#b8463a', 2.6);
+  for (let i = 1; i < 6; i++) g += L(`M0 ${-40 - i * 15} L160 ${-40 - i * 15}`, 1.4, 'rgba(0,0,0,.18)');
+  g += P('M-14 -126 L80 -182 L174 -126 Z', '#4a4f57', 2.6) + R(56, -100, 42, 60, '#2a2026', 4, 2.4) + R(160, -100, 50, 40, '#b8463a', 3, 2.4) + P('M156 -100 L214 -100 L208 -110 L160 -110 Z', '#4a4f57', 2);
+  g += P('M60 -40 L104 -40 L134 0 L90 0 Z', '#c9a06e', 2.2) + L('M72 -30 L98 -30 M84 -16 L110 -16', 2, '#8a6a44');
+  g += R(10, -122, 28, 18, '#f4efe6', 2, 2) + `<text x="24" y="-109" text-anchor="middle" font-family="Lilita One, sans-serif" font-size="9" fill="${C.ink}">EGGS</text>`;
+  return G(`translate(${x} ${y}) scale(${s})`, g);
+}
+/** Cordless drill (yellow and black). Origin = grip bottom; points right. */
+const drill = (x, y, s = 1, rot = 0) => G(`translate(${x} ${y}) rotate(${rot}) scale(${s})`,
+  R(-10, -8, 26, 14, '#2a2a30', 3, 2.2) + P('M-4 -8 L6 -8 L10 -42 L-6 -42 Z', '#2a2a30', 2.2) + R(-14, -64, 52, 24, '#f2c230', 6, 2.4) + R(38, -58, 16, 12, '#2a2a30', 2, 2) + L('M54 -52 L68 -52', 3, '#9aa0a8'));
+/** Half-built bed frame: white panel on grey rails with bolt holes, raised h off the carpet (a perfect cat cave).
+ *  Left edge x, floor y, width w. Draw tammy() BEFORE it so the frame hides her, leaving just a tail or white paws poking out below. */
+function bedFrame(x, y, w = 300, h = 120) {
+  let s = R(x + 6, y - h + 14, w - 12, 24, '#f3efe6', 2, 2.6) + L(`M${x + 20} ${y - h + 30} L${x + w - 20} ${y - h + 30}`, 1.4, '#cfc8ba');
+  s += R(x, y - h, w, 16, '#5d6168', 2, 2.6);
+  for (let i = 0; i < Math.floor(w / 22); i++) s += `<circle cx="${x + 12 + i * 22}" cy="${y - h + 8}" r="2.6" fill="#1d1c21"/>`;
+  return s + L(`M${x + 8} ${y - h + 16} L${x + 8} ${y} M${x + w - 8} ${y - h + 16} L${x + w - 8} ${y}`, 6, '#5d6168');
 }
 const LEAF_COLS = ['#e8792b', '#d9452f', '#f2b134', '#b8542a', '#e35b2a', '#c9a227'];
 function leaf(x, y, sc = 1, rot = 0, col = '#e8792b') {
